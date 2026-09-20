@@ -184,10 +184,48 @@
   .stat:last-child { border-bottom:0; }
   .chip { display:inline-block; font-size:12px; padding:3px 10px; border-radius:20px; font-weight:650; }
 
+  /* long-weekend tips */
+  .tip { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .tip:first-of-type { padding-top:2px; }
+  .tip:last-child { border-bottom:0; padding-bottom:0; }
+  .tipn { flex:none; width:56px; height:58px; border-radius:16px; background:var(--mint); color:#053F39; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+  .tipn b { font-size:24px; font-weight:600; letter-spacing:-.03em; }
+  .tipn span { font-size:10px; font-weight:600; margin-top:3px; }
+  .tipt { flex:1; min-width:0; }
+  .tipt b { display:block; font-size:14px; font-weight:650; letter-spacing:-.01em; }
+  .tipt span { display:block; font-size:12px; color:var(--mute); margin-top:2px; line-height:1.35; }
+  .chipbtn { flex:none; border:0; border-radius:14px; padding:9px 14px; background:var(--soft2); color:var(--accent); font:inherit; font-weight:650; font-size:13px; cursor:pointer; }
+  .chipbtn:active { transform:scale(.97); }
+
+  /* calendar */
+  .calhead { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .calhead b { font-size:17px; font-weight:650; letter-spacing:-.015em; }
+  .calhead .navb { border:0; width:40px; height:40px; border-radius:14px; background:var(--soft2); color:var(--accent); font:inherit; font-size:22px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .calhead .navb:active { transform:scale(.95); }
+  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+  .dow { text-align:center; font-size:11px; font-weight:600; color:var(--mute); padding-bottom:3px; }
+  .day { aspect-ratio:1; border:0; border-radius:12px; font:inherit; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; background:var(--soft); color:var(--ink); padding:0; cursor:pointer; font-variant-numeric:tabular-nums; }
+  .day.blank { background:transparent; cursor:default; }
+  .day.we { background:transparent; color:var(--mute); font-weight:500; }
+  .day.bh { background:var(--lav); color:#3B0764; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+  .day.appr { background:var(--indigo); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+  .day.pend { background:var(--amber); color:#4A2E00; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+  .day.oth { background:var(--rose); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+  .day.half { background-image:linear-gradient(135deg,transparent 52%,rgba(255,255,255,.5) 52%); }
+  .day.today { outline:2px solid var(--pink); outline-offset:2px; }
+  .todaybtn { border:0; background:transparent; color:var(--accent); font:inherit; font-weight:650; font-size:13px; cursor:pointer; padding:6px 4px; }
+
+  /* backup */
+  .filebtn { display:block; text-align:center; }
+  .twin { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .twin .btn { padding:12px 8px; font-size:14px; }
+  textarea.code { width:100%; font:inherit; font-size:13px; padding:11px 12px; border:1px solid var(--line); border-radius:14px; background:var(--input); color:var(--ink); min-height:76px; resize:vertical; margin-top:10px; }
+  textarea.code:focus { outline:none; border-color:var(--violet); box-shadow:0 0 0 4px rgba(124,58,237,.16); }
+
   /* bottom nav: frosted glass */
   .nav { z-index:20; position:fixed; left:0; right:0; bottom:0; display:flex; justify-content:center; padding:0 14px calc(12px + env(safe-area-inset-bottom)); pointer-events:none; }
   .navIn { pointer-events:auto; width:100%; max-width:420px; background:var(--glass); -webkit-backdrop-filter:blur(22px) saturate(1.7); backdrop-filter:blur(22px) saturate(1.7); border:1px solid var(--hair); border-radius:28px; display:flex; padding:6px; gap:4px; box-shadow:0 14px 34px -12px rgba(27,26,63,.4); }
-  .tab { flex:1; border:0; background:transparent; padding:9px 4px 7px; border-radius:22px; font:inherit; font-size:12px; font-weight:600; color:var(--mute); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; transition:background .2s, color .2s; }
+  .tab { flex:1; min-width:0; border:0; background:transparent; padding:9px 2px 7px; border-radius:22px; font:inherit; font-size:12px; font-weight:600; color:var(--mute); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; transition:background .2s, color .2s; }
   .tab svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
   .tab[aria-selected="true"] { background:linear-gradient(135deg,#4338CA,#7C3AED); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.24); }
 
@@ -249,6 +287,7 @@
   var hol = { date:"", name:"" };
   var topNote = "";
   var enterAnim = false;
+  var cal = { y:null, m:null };
   var REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   var animate = true; // pips pop in once when the app opens
 
@@ -331,6 +370,7 @@
 
   var ICON = {
     overview:'<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>',
+    calendar:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3.5"/><path d="M8 3v4M16 3v4M4 10.5h16"/></svg>',
     log:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
     settings:'<svg viewBox="0 0 24 24"><path d="M4 7h9M18 7h2M4 17h2M11 17h9"/><circle cx="15.5" cy="7" r="2.5"/><circle cx="8.5" cy="17" r="2.5"/></svg>'
   };
@@ -390,6 +430,161 @@
       '<text x="66" y="70" text-anchor="middle" font-size="28" font-weight="300" letter-spacing="-1" data-count="' + usedPct + '" data-suffix="%" style="fill:var(--ink)">' + usedPct + '%</text>' +
       '<text x="66" y="88" text-anchor="middle" font-size="11" font-weight="600" style="fill:var(--mute)">used</text></svg>' +
       '<div class="wlist">' + rows + "</div></div></div>";
+  }
+
+  // ---- long-weekend tips: find short gaps of working days that join bank holidays / weekends into long breaks ----
+  function bridgeTips(c) {
+    if (c.remainingIfAll <= 0) return [];
+    var y = year(), hs = c.hs, now0 = new Date(), todayIso = toStr(new Date(now0.getFullYear(), now0.getMonth(), now0.getDate()));
+    var booked = {};
+    c.approvedDays.concat(c.pendingDays).forEach(function (d) { booked[d.date] = 1; });
+    var days = [], d = new Date(y, 0, 1);
+    while (d.getFullYear() === y) {
+      var wd = d.getDay(), iso = toStr(d);
+      days.push({ iso:iso, off:(wd === 0 || wd === 6 || !!hs[iso]), bh:(!!hs[iso] && wd !== 0 && wd !== 6) });
+      d.setDate(d.getDate() + 1);
+    }
+    var runs = [], i = 0;
+    while (i < days.length) {
+      if (!days[i].off) { i++; continue; }
+      var j = i, bh = false;
+      while (j < days.length && days[j].off) { if (days[j].bh) bh = true; j++; }
+      runs.push({ s:i, e:j - 1, bh:bh });
+      i = j;
+    }
+    var out = [];
+    for (var r = 0; r + 1 < runs.length; r++) {
+      var a = runs[r], b = runs[r + 1], g = b.s - a.e - 1;
+      if (g < 1 || g > 4 || !(a.bh || b.bh)) continue;
+      var gap = days.slice(a.e + 1, b.s);
+      if (gap[0].iso < todayIso) continue;
+      var need = [];
+      gap.forEach(function (x, k) { if (!booked[x.iso]) need.push(k); });
+      if (need.length === 0 || need.length > c.remainingIfAll) continue;
+      var contiguous = need[need.length - 1] - need[0] === need.length - 1;
+      if (!contiguous) continue;
+      var total = b.e - a.s + 1;
+      if (total < 4) continue;
+      out.push({ start:gap[need[0]].iso, end:gap[need[need.length - 1]].iso, leaveDays:need.length, total:total, from:days[a.s].iso, to:days[b.e].iso, score:total / need.length });
+    }
+    out.sort(function (p, q) { return q.score - p.score || p.start.localeCompare(q.start); });
+    return out.slice(0, 3);
+  }
+
+  function rangeText(a, b) {
+    if (a === b) return dm(a);
+    var pa = parse(a), pb = parse(b);
+    return pa.getMonth() === pb.getMonth() ? pa.getDate() + "–" + dm(b) : dm(a) + " – " + dm(b);
+  }
+
+  function tipsCard(c) {
+    var tips = bridgeTips(c);
+    if (!tips.length) return "";
+    return '<div class="card"><h2>Make your days go further</h2><div class="sub" style="margin:-6px 0 10px">Book around bank holidays for longer breaks.</div>' +
+      tips.map(function (t) {
+        return '<div class="tip"><div class="tipn"><b>' + t.total + "</b><span>days off</span></div>" +
+          '<div class="tipt"><b>Take ' + rangeText(t.start, t.end) + "</b><span>" + t.leaveDays + (t.leaveDays === 1 ? " day" : " days") + " of leave gives you <i style=\"font-style:normal;white-space:nowrap\">" + rangeText(t.from, t.to) + "</i> off</span></div>" +
+          '<button class="chipbtn" data-act="tip" data-start="' + t.start + '" data-end="' + t.end + '">Book</button></div>';
+      }).join("") + "</div>";
+  }
+
+  // ---- month calendar ----
+  var MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  function calView(c) {
+    var now = new Date();
+    if (cal.y === null) {
+      if (now.getFullYear() === year()) { cal.y = now.getFullYear(); cal.m = now.getMonth(); }
+      else { cal.y = year(); cal.m = 0; }
+    }
+    var y = cal.y, m = cal.m, todayIso = toStr(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+    var first = new Date(y, m, 1), dim = new Date(y, m + 1, 0).getDate(), offset = (first.getDay() + 6) % 7;
+    var hs = c.hs, holName = {};
+    data.holidays.forEach(function (h) { holName[h.date] = h.name; });
+    var cells = "";
+    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function (n) { cells += '<div class="dow">' + n + "</div>"; });
+    for (var i = 0; i < offset; i++) cells += '<div class="day blank"></div>';
+    for (var d = 1; d <= dim; d++) {
+      var dt = new Date(y, m, d), iso = toStr(dt), wd = dt.getDay(), weekend = (wd === 0 || wd === 6);
+      var cls = "day", info = fmt(iso, true);
+      if (weekend) cls += " we";
+      else if (hs[iso]) { cls += " bh"; info += " · " + (holName[iso] || "Bank holiday"); }
+      else {
+        var hit = null;
+        c.items.forEach(function (l) {
+          if (l.status === "Rejected" || l.start > iso || l.end < iso) return;
+          var rank = l.type === "Annual Leave" ? (l.status === "Approved" ? 3 : 2) : 1;
+          if (!hit || rank > hit.rank) hit = { l:l, rank:rank };
+        });
+        if (hit) {
+          cls += hit.l.type === "Annual Leave" ? (hit.l.status === "Approved" ? " appr" : " pend") : " oth";
+          if (hit.l.half && hit.l.start === hit.l.end) cls += " half";
+          info += " · " + hit.l.type + " (" + hit.l.status.toLowerCase() + ")" + (hit.l.half && hit.l.start === hit.l.end ? ", half day" : "");
+        }
+      }
+      if (iso === todayIso) cls += " today";
+      cells += '<button class="' + cls + '" data-act="bhinfo" data-info="' + esc(info) + '" aria-label="' + esc(info) + '">' + d + "</button>";
+    }
+    // this month's list
+    var mStart = toStr(new Date(y, m, 1)), mEnd = toStr(new Date(y, m, dim)), list = "";
+    data.holidays.filter(function (h) { var w = parse(h.date).getDay(); return h.date >= mStart && h.date <= mEnd && w !== 0 && w !== 6; })
+      .forEach(function (h) { list += '<div class="blk"><i style="background:var(--lav)"></i><span><b>' + dm(h.date) + "</b> " + esc(h.name) + "</span></div>"; });
+    c.items.filter(function (l) { return l.status !== "Rejected" && l.end >= mStart && l.start <= mEnd; }).forEach(function (l) {
+      var col = l.type === "Annual Leave" ? (l.status === "Approved" ? "var(--indigo)" : "var(--amber)") : "var(--rose)";
+      list += '<div class="blk"><i style="background:' + col + '"></i><span><b>' + esc(l.type) + "</b> " + rangeText(l.start, l.end) + " · " + esc(l.status.toLowerCase()) + "</span></div>";
+    });
+    var isNow = now.getFullYear() === y && now.getMonth() === m;
+    return '<div class="card"><div class="calhead"><button class="navb" data-act="calprev" aria-label="Previous month">‹</button>' +
+      '<div style="text-align:center"><b>' + MONTH_NAMES[m] + " " + y + "</b>" + (isNow ? "" : '<div><button class="todaybtn" data-act="caltoday">Back to today</button></div>') + "</div>" +
+      '<button class="navb" data-act="calnext" aria-label="Next month">›</button></div>' +
+      '<div class="cal">' + cells + "</div>" +
+      '<div class="legend"><span class="lg"><i style="background:var(--lav)"></i>Bank holiday</span><span class="lg"><i style="background:var(--indigo)"></i>Approved</span><span class="lg"><i style="background:var(--amber)"></i>Pending</span><span class="lg"><i style="background:var(--rose)"></i>Sick / other</span></div></div>' +
+      '<div class="card"><h2>This month</h2>' + (list ? '<div class="blks" style="margin-top:0">' + list + "</div>" : '<div class="empty">Nothing booked this month.</div>') + "</div>";
+  }
+
+  // ---- backup: move data between phone and computer ----
+  function normalize(obj) {
+    var def = defaults(), re = /^\d{4}-\d{2}-\d{2}$/;
+    var settings = Object.assign(def.settings, obj.settings || {});
+    var leaves = (Array.isArray(obj.leaves) ? obj.leaves : []).filter(function (l) { return l && re.test(l.start) && re.test(l.end); }).map(function (l, i) {
+      return { id:l.id || (Date.now() + i), start:l.start, end:l.end, type:TYPES.indexOf(l.type) > -1 ? l.type : "Annual Leave", half:!!l.half, status:STATUSES.indexOf(l.status) > -1 ? l.status : "Pending", notes:String(l.notes || "") };
+    });
+    var holidays = (Array.isArray(obj.holidays) ? obj.holidays : []).filter(function (h) { return h && re.test(h.date); }).map(function (h) { return { date:h.date, name:String(h.name || "Bank holiday") }; });
+    return { seeded:true, settings:settings, leaves:leaves, holidays:holidays };
+  }
+  function makeCode() { return "LEAVE1:" + btoa(unescape(encodeURIComponent(JSON.stringify(data)))); }
+  function readBackup(text) {
+    text = String(text || "").trim();
+    if (text.indexOf("LEAVE1:") === 0) text = decodeURIComponent(escape(atob(text.slice(7).replace(/\s+/g, ""))));
+    var obj = JSON.parse(text);
+    if (!obj || typeof obj !== "object" || !obj.settings || !Array.isArray(obj.leaves)) throw new Error("bad");
+    return normalize(obj);
+  }
+  function restoreFrom(text) {
+    var next;
+    try { next = readBackup(text); } catch (e) { toast("That backup couldn't be read. Check you copied all of it."); return; }
+    var msg = "Replace everything on this device with the backup? It has " + next.leaves.length + " leave entr" + (next.leaves.length === 1 ? "y" : "ies") + " for " + next.settings.year + ".";
+    if (!window.confirm(msg)) return;
+    data = next; save(); cal = { y:null, m:null }; render(); toast("Backup restored");
+  }
+  function saveFile() {
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type:"application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "leave-backup-" + toStr(new Date()) + ".json";
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); if (a.parentNode) a.parentNode.removeChild(a); }, 800);
+    toast("Backup saved to your downloads");
+  }
+  function copyCode() {
+    var code = makeCode();
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = code; ta.style.cssText = "position:fixed;opacity:0;top:0;left:0"; document.body.appendChild(ta); ta.focus(); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      toast(ok ? "Backup code copied" : "Couldn't copy. Use Save backup file instead.");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(function () { toast("Backup code copied"); }, fallback);
+    else fallback();
   }
 
   function overview(c) {
@@ -469,7 +664,7 @@
 
     return '<div class="card hero">' +
       '<div class="pips' + (animate ? " anim" : "") + '" role="img" aria-label="' + num(c.available) + ' days: ' + num(c.remaining) + ' left">' + pipsHtml(c) + "</div>" +
-      '<div class="legend">' + legend + "</div>" + (blocks ? '<div class="blks">' + blocks + "</div>" : "") + "</div>" + warn + nudge + wheelCard(c) +
+      '<div class="legend">' + legend + "</div>" + (blocks ? '<div class="blks">' + blocks + "</div>" : "") + "</div>" + warn + nudge + tipsCard(c) + wheelCard(c) +
       '<div class="card"><h2>Your year</h2><div class="strip">' + months + ticks + bars +
       (todayPct !== null ? '<div class="today" style="left:' + todayPct + '%"></div>' : "") + "</div>" +
       '<div class="mlab">' + mlabels + "</div>" +
@@ -519,6 +714,10 @@
       '<div class="row"><div><label for="h-date">Date</label><input id="h-date" type="date" value="' + hol.date + '"></div>' +
       '<div><label for="h-name">Name</label><input id="h-name" type="text" value="' + esc(hol.name) + '"></div></div>' +
       '<button class="btn" data-act="addhol">Add holiday</button><button class="btn soft" data-act="addew">Re-add England &amp; Wales 2026–27</button><div style="margin-top:10px">' + hols + "</div></div>" +
+      '<div class="card"><h2>Backup and move your data</h2><div class="sub" style="margin:-6px 0 12px">Your leave is stored on this device only. To move it to another phone or your computer, copy a backup code here, send it to yourself, then paste it on the other device.</div>' +
+      '<div class="twin"><button class="btn" data-act="copycode">Copy backup code</button><button class="btn soft" style="margin-top:0" data-act="savefile">Save backup file</button></div>' +
+      '<textarea class="code" id="code-in" placeholder="Paste a backup code here" aria-label="Backup code" spellcheck="false"></textarea>' +
+      '<div class="twin" style="margin-top:10px"><button class="btn" data-act="restorecode">Restore from code</button><label class="btn soft filebtn" style="margin:0;color:var(--accent)">Restore from file<input type="file" id="imp" accept=".json,application/json" hidden></label></div></div>' +
       '<div class="card"><h2>Your data</h2><div class="sub" style="margin-bottom:12px">Everything is stored in this browser on this device. Clearing browser data will erase it.</div>' +
       '<button class="btn danger" data-act="reset">Clear all data</button></div>';
   }
@@ -527,7 +726,7 @@
     var c = computed();
     var s = data.settings;
     var big = tab === "overview";
-    var nav = [["overview","Overview"],["log","Log leave"],["settings","Settings"]].map(function (t) {
+    var nav = [["overview","Overview"],["calendar","Calendar"],["log","Log leave"],["settings","Settings"]].map(function (t) {
       return '<button class="tab" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICON[t[0]] + "<span>" + t[1] + "</span></button>";
     }).join("");
     var stage = "";
@@ -540,7 +739,7 @@
     document.getElementById("app").innerHTML =
       '<div class="top' + (big ? " big" : "") + '"><h1>' + (s.name ? esc(s.name) + "'s leave" : "Annual leave") + " " + year() + "</h1>" + stage +
       "<p id=\"topnote\"></p></div>" +
-      '<div class="body' + (enterAnim ? " enter" : "") + '">' + (tab === "overview" ? overview(c) : tab === "log" ? logView(c) : settingsView()) + "</div>" +
+      '<div class="body' + (enterAnim ? " enter" : "") + '">' + (tab === "overview" ? overview(c) : tab === "calendar" ? calView(c) : tab === "log" ? logView(c) : settingsView()) + "</div>" +
       '<div class="nav"><div class="navIn" role="tablist">' + nav + "</div></div>";
     enterAnim = false;
     var tn = document.getElementById("topnote");
@@ -602,6 +801,7 @@
   }
 
   function toast(msg, ms) {
+    Array.prototype.forEach.call(document.querySelectorAll(".toast"), function (o) { if (o.parentNode) o.parentNode.removeChild(o); });
     var t = document.createElement("div");
     t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg;
     document.body.appendChild(t);
@@ -617,6 +817,18 @@
     if (t.dataset.tab) { if (tab !== t.dataset.tab) enterAnim = true; tab = t.dataset.tab; render(); window.scrollTo(0, 0); return; }
     var act = t.dataset.act;
     if (act === "bhinfo") { toast(t.dataset.info, 3200); return; }
+    if (act === "calprev" || act === "calnext") {
+      var step = act === "calprev" ? -1 : 1, nd = new Date(cal.y, cal.m + step, 1);
+      cal.y = nd.getFullYear(); cal.m = nd.getMonth(); render(); return;
+    }
+    if (act === "caltoday") { cal = { y:null, m:null }; render(); return; }
+    if (act === "tip") {
+      form.start = t.dataset.start; form.end = t.dataset.end; form.type = "Annual Leave"; form.half = false; form.status = "Pending"; error = "";
+      tab = "log"; enterAnim = true; render(); window.scrollTo(0, 0); return;
+    }
+    if (act === "copycode") { copyCode(); return; }
+    if (act === "savefile") { saveFile(); return; }
+    if (act === "restorecode") { var ci = document.getElementById("code-in"); restoreFrom(ci ? ci.value : ""); return; }
     if (act === "add") {
       if (!form.start) { error = "Choose a start date."; return render(); }
       var end = form.end || form.start;
@@ -669,6 +881,10 @@
     } else if (el.dataset.status) {
       data.leaves.forEach(function (l) { if (String(l.id) === el.dataset.status) l.status = el.value; });
       save(); render();
+    } else if (el.id === "imp") {
+      var f = el.files && el.files[0];
+      if (f) { var fr = new FileReader(); fr.onload = function () { restoreFrom(fr.result); }; fr.readAsText(f); }
+      el.value = "";
     } else if (el.id === "h-date") hol.date = el.value;
     else if (el.id === "h-name") hol.name = el.value;
   });
