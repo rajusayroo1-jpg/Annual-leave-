@@ -41,11 +41,18 @@
   .ifAll b { display:block; font-size:22px; color:var(--ink); }
   .pips { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
   .pip { aspect-ratio:1; border-radius:11px; }
-  .pip.bh { background:var(--lav); color:#3B0764; border:0; padding:2px 1px; font:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; line-height:1.05; overflow:hidden; }
-  .pip.bh b { font-size:11px; font-weight:900; white-space:nowrap; }
-  .pip.bh small { font-size:8px; font-weight:700; margin-top:2px; max-height:2.1em; overflow:hidden; word-break:break-word; }
+  .pip.lbl { border:0; padding:2px 1px; font:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; line-height:1.05; overflow:hidden; }
+  .pip.lbl b { font-size:11px; font-weight:900; white-space:nowrap; }
+  .pip.lbl small { font-size:8px; font-weight:700; margin-top:2px; max-height:2.1em; overflow:hidden; word-break:break-word; }
+  .pip.bh { background:var(--lav); color:#3B0764; }
   .pip.taken { background:var(--indigo); }
   .pip.pending { background:var(--amber); }
+  .pip.pending.lbl { color:#4A2E00; }
+  .pip.taken.lbl { color:#fff; }
+  .blks { margin-top:12px; display:flex; flex-direction:column; gap:6px; }
+  .blk { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; background:#F5F3FF; border-radius:12px; padding:8px 10px; }
+  .blk i { flex:none; width:12px; height:12px; border-radius:4px; display:block; }
+  .blk span b { font-weight:800; }
   .pip.free { background:var(--mint); }
   .anim .pip { animation:pop .38s cubic-bezier(.2,1.4,.4,1) both; animation-delay:calc(var(--i) * 16ms); }
   @keyframes pop { from { transform:scale(.2); opacity:0; } to { transform:scale(1); opacity:1; } }
@@ -232,9 +239,22 @@
       bhList.sort(function (a, b) { return a.date.localeCompare(b.date); });
     }
     var bh = bhList.length;
+    var approvedDays = [], pendingDays = [];
+    items.forEach(function (l) {
+      if (l.type !== "Annual Leave" || (l.status !== "Approved" && l.status !== "Pending")) return;
+      var s0 = parse(l.start), e0 = parse(l.end), ys = new Date(y, 0, 1), ye = new Date(y, 11, 31);
+      if (s0 < ys) s0 = ys;
+      if (e0 > ye) e0 = ye;
+      var w = (l.half && l.start === l.end) ? 0.5 : 1;
+      for (var d = new Date(s0); d <= e0; d.setDate(d.getDate() + 1)) {
+        var wd = d.getDay();
+        if (wd === 0 || wd === 6 || hs[toStr(d)]) continue;
+        (l.status === "Approved" ? approvedDays : pendingDays).push({ date:toStr(d), w:w });
+      }
+    });
     var taken = Number(data.settings.taken || 0);
     var left = available - bh - taken - used;
-    return { items:items, sum:sum, available:available, bh:bh, bhList:bhList, taken:taken, used:used, pending:pending, remaining:left, remainingIfAll:left - pending, hs:hs };
+    return { items:items, sum:sum, available:available, bh:bh, bhList:bhList, approvedDays:approvedDays, pendingDays:pendingDays, taken:taken, used:used, pending:pending, remaining:left, remainingIfAll:left - pending, hs:hs };
   }
 
   function chipStyle(s) {
@@ -258,14 +278,20 @@
 
   function pipsHtml(c) {
     var total = Math.max(1, Math.ceil(c.available));
-    var b1 = c.bh, b2 = b1 + c.taken + c.used, b3 = b2 + c.pending, out = "";
+    var segs = [], at = 0;
+    function push(cls, w, date, info, sub) { segs.push({ cls:cls, s:at, e:at + w, date:date, info:info, sub:sub }); at += w; }
+    c.bhList.forEach(function (h) { push("bh", 1, h.date, fmt(h.date, true) + " · " + h.name, shortName(h.name)); });
+    if (c.taken > 0) push("taken", c.taken, "", "", "");
+    c.approvedDays.forEach(function (d) { push("taken", d.w, d.date, fmt(d.date, true) + " · Annual leave (approved)", "Leave"); });
+    c.pendingDays.forEach(function (d) { push("pending", d.w, d.date, fmt(d.date, true) + " · Annual leave (pending)", "Pending"); });
+    var out = "";
     for (var i = 0; i < total; i++) {
-      var m = i + 0.5, cls = m < b1 ? "bh" : m < b2 ? "taken" : m < b3 ? "pending" : "free";
-      var h = cls === "bh" ? c.bhList[i] : null;
-      if (h) {
-        out += '<button class="pip bh" style="--i:' + i + '" data-act="bhinfo" data-info="' + esc(fmt(h.date, true) + " · " + h.name) + '"><b>' + dm(h.date) + "</b><small>" + esc(shortName(h.name)) + "</small></button>";
+      var m = i + 0.5, seg = null;
+      for (var k = 0; k < segs.length; k++) { if (m >= segs[k].s && m < segs[k].e) { seg = segs[k]; break; } }
+      if (seg && seg.date) {
+        out += '<button class="pip lbl ' + seg.cls + '" style="--i:' + i + '" data-act="bhinfo" data-info="' + esc(seg.info) + '"><b>' + dm(seg.date) + "</b><small>" + esc(seg.sub) + "</small></button>";
       } else {
-        out += '<div class="pip ' + cls + '" style="--i:' + i + '"></div>';
+        out += '<div class="pip ' + (seg ? seg.cls : "free") + '" style="--i:' + i + '"></div>';
       }
     }
     return out;
@@ -308,6 +334,13 @@
         '<button data-tab="log" style="background:' + tone[2] + '">Book</button></div>';
     }
 
+    var blocks = c.items.filter(function (l) {
+      return l.type === "Annual Leave" && (l.status === "Approved" || l.status === "Pending") && l.yearDays > 0;
+    }).map(function (l) {
+      var col = l.status === "Approved" ? "var(--indigo)" : "var(--amber)";
+      return '<div class="blk"><i style="background:' + col + '"></i><span><b>' + l.status + "</b> " + dm(l.start) + (l.end !== l.start ? " – " + dm(l.end) : "") + " · " + num(l.yearDays) + (l.yearDays === 1 ? " day" : " days") + "</span></div>";
+    }).join("");
+
     var legend = (data.settings.includesBH ? '<span class="lg"><i style="background:var(--lav)"></i>Bank holidays ' + num(c.bh) + "</span>" : "") +
       '<span class="lg"><i style="background:var(--indigo)"></i>Taken ' + num(c.taken + c.used) + "</span>" +
       '<span class="lg"><i style="background:var(--amber)"></i>Pending ' + num(c.pending) + "</span>" +
@@ -326,7 +359,7 @@
     return '<div class="card hero"><div class="heroTop"><div><div class="big' + (neg ? " neg" : "") + '">' + num(c.remaining) + '</div><div class="bigLbl">days left this year</div></div>' +
       '<div class="ifAll">if pending approved<b style="color:' + (c.remainingIfAll < 0 ? "#F43F5E" : "#1E1B4B") + '">' + num(c.remainingIfAll) + "</b></div></div>" +
       '<div class="pips' + (animate ? " anim" : "") + '" role="img" aria-label="' + num(c.available) + ' days: ' + num(c.remaining) + ' left">' + pipsHtml(c) + "</div>" +
-      '<div class="legend">' + legend + "</div></div>" + warn + nudge +
+      '<div class="legend">' + legend + "</div>" + (blocks ? '<div class="blks">' + blocks + "</div>" : "") + "</div>" + warn + nudge +
       '<div class="card"><h2>Your year</h2><div class="strip">' + months + ticks + bars +
       (todayPct !== null ? '<div class="today" style="left:' + todayPct + '%"></div>' : "") + "</div>" +
       '<div class="mlab">' + mlabels + "</div>" +
