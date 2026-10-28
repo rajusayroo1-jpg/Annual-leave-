@@ -204,7 +204,8 @@
   .calhead .navb:active { transform:scale(.95); }
   .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
   .dow { text-align:center; font-size:11px; font-weight:600; color:var(--mute); padding-bottom:3px; }
-  .day { aspect-ratio:1; border:0; border-radius:12px; font:inherit; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; background:var(--soft); color:var(--ink); padding:0; cursor:pointer; font-variant-numeric:tabular-nums; }
+  .day { position:relative; aspect-ratio:1; border:0; border-radius:12px; font:inherit; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; background:var(--soft); color:var(--ink); padding:0; cursor:pointer; font-variant-numeric:tabular-nums; }
+  .day .moon { position:absolute; right:2px; bottom:1px; font-size:9px; line-height:1; filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); pointer-events:none; }
   .day.blank { background:transparent; cursor:default; }
   .day.we { background:transparent; color:var(--mute); font-weight:500; }
   .day.bh { background:var(--lav); color:#3B0764; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
@@ -258,7 +259,7 @@
   ];
   function ewList() { return EW.map(function (h) { return { date:h[0], name:h[1] }; }); }
   function defaults() {
-    return { seeded:true, settings:{ name:"", year:new Date().getFullYear(), entitlement:28, includesBH:true, carry:0, taken:13, hours:8 }, leaves:[], holidays:ewList() };
+    return { seeded:true, settings:{ name:"", year:new Date().getFullYear(), entitlement:28, includesBH:true, showMoon:true, carry:0, taken:13, hours:8 }, leaves:[], holidays:ewList() };
   }
   function load() {
     try {
@@ -490,6 +491,20 @@
 
   // ---- month calendar ----
   var MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  // ---- moon phase (approximate): marks the day the moon turns full, accurate to within about a day ----
+  var SYNODIC = 29.530588853;
+  var KNOWN_NEW_MOON = Date.UTC(2000, 0, 6, 18, 14, 0);
+  function moonAge(d) {
+    var diffDays = (d.getTime() - KNOWN_NEW_MOON) / 86400000;
+    return ((diffDays % SYNODIC) + SYNODIC) % SYNODIC;
+  }
+  function isFullMoonDay(y, m, day) {
+    var a0 = moonAge(new Date(y, m, day, 12, 0, 0));
+    var a1 = moonAge(new Date(y, m, day + 1, 12, 0, 0));
+    if (a1 < a0) a1 += SYNODIC;
+    return a0 <= SYNODIC / 2 && a1 > SYNODIC / 2;
+  }
+
   function calView(c) {
     var now = new Date();
     if (cal.y === null) {
@@ -522,7 +537,9 @@
         }
       }
       if (iso === todayIso) cls += " today";
-      cells += '<button class="' + cls + '" data-act="bhinfo" data-info="' + esc(info) + '" aria-label="' + esc(info) + '">' + d + "</button>";
+      var moon = data.settings.showMoon !== false && isFullMoonDay(y, m, d);
+      if (moon) info += " · Full moon";
+      cells += '<button class="' + cls + '" data-act="bhinfo" data-info="' + esc(info) + '" aria-label="' + esc(info) + '">' + d + (moon ? '<span class="moon" aria-hidden="true">\ud83c\udf15</span>' : "") + "</button>";
     }
     // this month's list
     var mStart = toStr(new Date(y, m, 1)), mEnd = toStr(new Date(y, m, dim)), list = "";
@@ -537,7 +554,7 @@
       '<div style="text-align:center"><b>' + MONTH_NAMES[m] + " " + y + "</b>" + (isNow ? "" : '<div><button class="todaybtn" data-act="caltoday">Back to today</button></div>') + "</div>" +
       '<button class="navb" data-act="calnext" aria-label="Next month">›</button></div>' +
       '<div class="cal">' + cells + "</div>" +
-      '<div class="legend"><span class="lg"><i style="background:var(--lav)"></i>Bank holiday</span><span class="lg"><i style="background:var(--indigo)"></i>Approved</span><span class="lg"><i style="background:var(--amber)"></i>Pending</span><span class="lg"><i style="background:var(--rose)"></i>Sick / other</span></div></div>' +
+      '<div class="legend"><span class="lg"><i style="background:var(--lav)"></i>Bank holiday</span><span class="lg"><i style="background:var(--indigo)"></i>Approved</span><span class="lg"><i style="background:var(--amber)"></i>Pending</span><span class="lg"><i style="background:var(--rose)"></i>Sick / other</span>' + (data.settings.showMoon !== false ? '<span class="lg">\ud83c\udf15 Full moon</span>' : "") + "</div></div>" +
       '<div class="card"><h2>This month</h2>' + (list ? '<div class="blks" style="margin-top:0">' + list + "</div>" : '<div class="empty">Nothing booked this month.</div>') + "</div>";
   }
 
@@ -709,7 +726,9 @@
       '<div class="row"><div><label for="s-car">Carried over (days)</label><input id="s-car" type="number" inputmode="decimal" step="0.5" data-set="carry" value="' + esc(s.carry) + '"></div>' +
       '<div><label for="s-hrs">Hours per day</label><input id="s-hrs" type="number" inputmode="decimal" step="0.5" data-set="hours" value="' + esc(s.hours) + '"></div></div>' +
       '<label class="check"><input type="checkbox" data-set="includesBH"' + (s.includesBH ? " checked" : "") + '> My entitlement includes bank holidays</label>' +
-      '<div class="sub">When this is on, each weekday bank holiday in the year comes off your allowance automatically, so you only log the extra days you book.</div></div>' +
+      '<div class="sub">When this is on, each weekday bank holiday in the year comes off your allowance automatically, so you only log the extra days you book.</div>' +
+      '<label class="check" style="margin-top:12px"><input type="checkbox" data-set="showMoon"' + (s.showMoon !== false ? " checked" : "") + '> Show full moon days on the calendar</label>' +
+      '<div class="sub">A small \ud83c\udf15 marks the day the moon turns full. Dates are approximate, within about a day.</div></div>' +
       '<div class="card"><h2>Bank holidays</h2><div class="sub" style="margin-bottom:12px">England &amp; Wales holidays for 2026–27 are pre-loaded. Check them against your region (Scotland and Northern Ireland differ).</div>' +
       '<div class="row"><div><label for="h-date">Date</label><input id="h-date" type="date" value="' + hol.date + '"></div>' +
       '<div><label for="h-name">Name</label><input id="h-name" type="text" value="' + esc(hol.name) + '"></div></div>' +
