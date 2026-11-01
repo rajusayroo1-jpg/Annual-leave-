@@ -147,6 +147,14 @@
   .dbadge span { font-size:12px; font-weight:600; }
 
   /* other absence */
+  .moonrow { display:flex; align-items:center; gap:14px; }
+  .moonrow svg { flex:none; filter:drop-shadow(0 4px 12px rgba(255,214,102,.45)); }
+  .moonrow .mt { flex:1; min-width:0; }
+  .moonrow .mt b { display:block; font-size:16px; font-weight:650; letter-spacing:-.012em; }
+  .moonrow .mt span { display:block; font-size:13px; color:var(--mute); margin-top:2px; }
+  .moonrow .cd b { color:#D99A0B; }
+  .moonnext { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--mute); }
+  .moonnext b { color:var(--ink); font-weight:650; }
   .tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
   .tile { border-radius:16px; padding:12px 8px; text-align:center; }
   .tile b { display:block; font-size:26px; font-weight:300; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
@@ -604,6 +612,31 @@
     else fallback();
   }
 
+  // ---- dashboard: next full moon ----
+  function nextFullMoons(from, count) {
+    var out = [], d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    for (var i = 0; i < 120 && out.length < count; i++) {
+      if (isFullMoonDay(d.getFullYear(), d.getMonth(), d.getDate())) out.push({ iso:toStr(d), days:i });
+      d.setDate(d.getDate() + 1);
+    }
+    return out;
+  }
+  function moonSvg() {
+    return '<svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><defs><radialGradient id="mg" cx="38%" cy="34%" r="75%"><stop offset="0" stop-color="#FFF8DC"/><stop offset="0.6" stop-color="#FFE59A"/><stop offset="1" stop-color="#F2C14E"/></radialGradient></defs>' +
+      '<circle cx="26" cy="26" r="24" fill="url(#mg)"/><circle cx="18" cy="20" r="4.2" fill="#E8B84A" opacity=".5"/><circle cx="33" cy="31" r="5.6" fill="#E8B84A" opacity=".42"/><circle cx="24" cy="36" r="2.6" fill="#E8B84A" opacity=".5"/><circle cx="35" cy="15" r="2.4" fill="#E8B84A" opacity=".4"/></svg>';
+  }
+  function moonCard() {
+    if (data.settings.showMoon === false) return "";
+    var list = nextFullMoons(new Date(), 2);
+    if (!list.length) return "";
+    var a = list[0], b = list[1];
+    var big = a.days === 0 ? "Tonight" : a.days === 1 ? "Tomorrow" : "in " + a.days + " days";
+    var cd = a.days <= 1 ? "" : '<div class="cd"><b data-count="' + a.days + '">' + a.days + "</b><span>days to go</span></div>";
+    return '<div class="card"><h2>Next full moon</h2><div class="moonrow">' + moonSvg() +
+      '<div class="mt"><b>' + fmt(a.iso) + "</b><span>" + big + "</span></div>" + cd + "</div>" +
+      (b ? '<div class="moonnext">Then <b>' + fmt(b.iso) + "</b> · in " + b.days + " days</div>" : "") + "</div>";
+  }
+
   function overview(c) {
     var y = year();
     var yStart = new Date(y, 0, 1).getTime(), span = new Date(y, 11, 31, 23, 59).getTime() - yStart;
@@ -687,6 +720,7 @@
       '<div class="mlab">' + mlabels + "</div>" +
       '<div class="legend" style="margin-top:10px"><span class="lg"><i style="background:var(--indigo)"></i>Approved</span><span class="lg"><i style="background:#FFB020"></i>Pending</span><span class="lg"><i style="background:#F43F5E"></i>Sick / other</span><span class="lg"><i style="background:#C084FC"></i>Bank holiday</span></div></div>' +
       '<div class="card next"><h2>Next up</h2>' + nextHtml + "</div>" +
+      moonCard() +
       '<div class="card"><h2>Other time off (approved)</h2><div class="tiles">' + other + "</div></div>";
   }
 
