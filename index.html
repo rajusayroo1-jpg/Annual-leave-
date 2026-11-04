@@ -2,206 +2,952 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b1020">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4338CA">
+<meta name="color-scheme" content="light dark">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Leave">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Neon Runner">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>Neon Runner 3D</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234338CA'/%3E%3Cstop offset='1' stop-color='%23EC4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Crect x='14' y='14' width='16' height='16' rx='5' fill='%232DD4BF'/%3E%3Crect x='34' y='14' width='16' height='16' rx='5' fill='%23FFB020'/%3E%3Crect x='14' y='34' width='16' height='16' rx='5' fill='%23C084FC'/%3E%3Crect x='34' y='34' width='16' height='16' rx='5' fill='white'/%3E%3C/svg%3E">
+<title>Annual Leave</title>
 <style>
-:root{--bg:#0b1020;--fg:#ffffff;--accent:#ff4fa3;--panel:rgba(11,16,32,.75);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0b1020;--fg:#ffffff;--accent:#ff4fa3;--panel:rgba(11,16,32,.75)}}
-:root[data-theme="dark"]{--bg:#0b1020;--fg:#ffffff;--accent:#ff4fa3;--panel:rgba(11,16,32,.75)}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
-canvas{display:block;width:100%;height:100%}
-#hud{position:fixed;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 0;display:flex;justify-content:space-between;font-weight:700;font-size:22px;pointer-events:none;text-shadow:0 2px 6px #000}
-#msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:var(--panel);padding:24px}
-#msg h1{margin:0 0 8px;font-size:34px;color:var(--accent)}
-#msg p{margin:4px 0;opacity:.9}
-#msg .btn{margin-top:20px;padding:12px 28px;border-radius:999px;background:var(--accent);color:#fff;font-weight:700}
+  :root {
+    color-scheme:light dark;
+    --ink:#1B1A3F; --mute:#666689; --bg:#F4F2FC; --card:#fff; --line:#ECE9F7; --hair:rgba(27,26,63,.07);
+    --soft:#F6F4FD; --soft2:#EEF0FF; --m1:#EFF1FE; --m2:#F6EFFE; --input:#FBFAFF; --track:#EEEAFB;
+    --indigo:#4338CA; --violet:#7C3AED; --pink:#EC4899;
+    --mint:#2DD4BF; --mintDeep:#0F9D8E; --amber:#FFB020; --lav:#C084FC; --rose:#F43F5E; --sky:#38BDF8;
+    --accent:#4338CA;
+    --ok-bg:#CCFBEF; --ok-fg:#0B7A6D; --pd-bg:#FFEBC2; --pd-fg:#9A5B00; --rj-bg:#FFE1E6; --rj-fg:#BE123C;
+    --ta-bg:#E0E7FF; --ta-fg:#4338CA; --ts-bg:#FFE4E6; --ts-fg:#BE123C; --tu-bg:#E2E8F0; --tu-fg:#475569; --to-bg:#FEF3C7; --to-fg:#B45309;
+    --n1-bg:#E0F2FE; --n1-fg:#075985; --n1-btn:#0284C7; --n2-bg:#FFF3D6; --n2-fg:#8A5300; --n2-btn:#D97706; --n3-bg:#FFE4E6; --n3-fg:#9F1239; --n3-btn:#E11D48;
+    --warn-bg:#FFF1F2; --warn-fg:#BE123C; --prev-bg:#ECFDF9; --prev-fg:#0B7A6D; --err:#BE123C;
+    --next1:#FFF7E0; --next2:#FFE9F1; --toast-bg:rgba(27,26,63,.88); --toast-fg:#fff;
+    --glass:rgba(255,255,255,.74);
+    --shadow:0 1px 2px rgba(27,26,63,.04), 0 12px 28px -14px rgba(67,56,202,.22);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink:#F1EFFF; --mute:#A6A6CC; --bg:#0D0C1E; --card:#181733; --line:#2A2954; --hair:rgba(255,255,255,.08);
+      --soft:#222149; --soft2:#26255A; --m1:#1E1D41; --m2:#242251; --input:#12112A; --track:#2E2D5C;
+      --indigo:#7C7CF8; --mintDeep:#2DD4BF;
+      --accent:#B4B7FF;
+      --ok-bg:#0F3D38; --ok-fg:#5EEAD4; --pd-bg:#4A3410; --pd-fg:#FFC94D; --rj-bg:#4A1A28; --rj-fg:#FF9DB0;
+      --ta-bg:#2B2B70; --ta-fg:#C3C6FF; --ts-bg:#4A1A28; --ts-fg:#FF9DB0; --tu-bg:#2E3444; --tu-fg:#B7C0D4; --to-bg:#4A3410; --to-fg:#FFC94D;
+      --n1-bg:#10303F; --n1-fg:#7DD3FC; --n2-bg:#3F2D0C; --n2-fg:#FFC94D; --n3-bg:#45182A; --n3-fg:#FF9DB0;
+      --warn-bg:#45182A; --warn-fg:#FF9DB0; --prev-bg:#0F3D38; --prev-fg:#5EEAD4; --err:#FF9DB0;
+      --next1:#3A2F1A; --next2:#3A1F2E; --toast-bg:rgba(241,239,255,.92); --toast-fg:#1B1A3F;
+      --glass:rgba(24,23,51,.72);
+      --shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 16px 32px -16px rgba(0,0,0,.7);
+    }
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; background:var(--bg); }
+  body { font-family:"Inter","SF Pro Display","Segoe UI Variable Display","Segoe UI",Roboto,system-ui,-apple-system,sans-serif; color:var(--ink); letter-spacing:-.006em; -webkit-font-smoothing:antialiased; }
+  #app { max-width:560px; margin:0 auto; min-height:100vh; padding-bottom:calc(104px + env(safe-area-inset-bottom)); }
+
+  /* header: layered gradient, square-grid pattern echoing the day squares */
+  .top { position:relative; overflow:hidden; color:#fff; padding:calc(20px + env(safe-area-inset-top)) 22px 88px; border-radius:0 0 34px 34px;
+    background:
+      radial-gradient(90% 75% at 100% 0%, rgba(236,72,153,.62) 0%, rgba(236,72,153,0) 60%),
+      radial-gradient(70% 60% at 0% 100%, rgba(45,212,191,.30) 0%, rgba(45,212,191,0) 62%),
+      linear-gradient(165deg,#2B2290 0%,#4A2BD1 48%,#7C3AED 100%); }
+  .top::before { content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='8' y='8' width='14' height='14' rx='4.5' fill='white' fill-opacity='.075'/%3E%3C/svg%3E");
+    background-size:30px 30px;
+    -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0) 90%); mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0) 90%); }
+  .top > * { position:relative; }
+  .top h1 { margin:0; font-size:26px; font-weight:650; letter-spacing:-.028em; }
+  .top.big h1 { font-size:15px; font-weight:600; letter-spacing:0; opacity:.92; }
+  .top p { margin:8px 0 0; font-size:13px; font-weight:500; opacity:.92; }
+  .top p:empty { display:none; }
+  .top.big p { display:inline-block; margin-top:18px; padding:7px 13px; border-radius:20px; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.2); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  .stage { display:flex; align-items:flex-end; gap:14px; margin-top:14px; }
+  .heronum { font-size:112px; line-height:.8; font-weight:200; letter-spacing:-.065em; font-variant-numeric:tabular-nums; text-shadow:0 10px 44px rgba(20,10,90,.38); }
+  .heronum.neg { color:#FFB9C6; }
+  .herolbl { padding-bottom:4px; }
+  .herolbl b { display:block; font-size:20px; font-weight:600; letter-spacing:-.015em; line-height:1.1; }
+  .herolbl span { display:block; font-size:14px; opacity:.78; margin-top:3px; }
+  .ifall { margin-left:auto; text-align:right; font-size:12px; opacity:.88; padding-bottom:4px; }
+  .ifall b { display:block; font-size:26px; font-weight:300; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .body { position:relative; z-index:1; padding:0 14px; margin-top:-56px; }
+  .top.big + .body { margin-top:-64px; }
+  .body.enter { animation:screenIn .32s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes screenIn { from { opacity:0; transform:translateY(8px); } }
+  @media (prefers-reduced-motion: reduce) { .body.enter { animation:none; } }
+
+  /* cards: hairline edge, layered shadow */
+  .card { background:var(--card); border:1px solid var(--hair); border-radius:24px; padding:18px; margin-top:14px; box-shadow:var(--shadow); }
+  .card h2 { font-size:15px; margin:0 0 12px; font-weight:650; letter-spacing:-.012em; }
+  .sub { color:var(--mute); font-size:13px; line-height:1.45; margin-top:4px; }
+
+  /* day squares: tactile tiles */
+  .hero { padding:18px; }
+  .pips { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+  .pip { aspect-ratio:1; border-radius:12px; box-shadow:inset 0 1px 0 rgba(255,255,255,.32), inset 0 -2px 0 rgba(0,0,0,.07); }
+  .pip.lbl { border:0; padding:2px 1px; font:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; line-height:1.05; overflow:hidden; }
+  .pip.lbl b { font-size:11px; font-weight:700; white-space:nowrap; letter-spacing:-.01em; }
+  .pip.lbl small { font-size:clamp(6.5px,1.9vw,8px); font-weight:600; margin-top:2px; max-height:2.1em; overflow:hidden; letter-spacing:-.02em; }
+  .pip.bh { background:var(--lav); color:#3B0764; }
+  .pip.taken { background:var(--indigo); }
+  .pip.pending { background:var(--amber); }
+  .pip.pending.lbl { color:#4A2E00; }
+  .pip.taken.lbl { color:#fff; }
+  .pip.free { background:var(--mint); }
+  .anim .pip { animation:pop .4s cubic-bezier(.2,1.4,.4,1) both; animation-delay:calc(var(--i) * 16ms); }
+  @keyframes pop { from { transform:scale(.2); opacity:0; } to { transform:scale(1); opacity:1; } }
+  @media (prefers-reduced-motion: reduce) { .anim .pip { animation:none; } }
+  .wheelRow { display:flex; align-items:center; gap:12px; }
+  .wheelRow svg { flex:none; }
+  .wlist { flex:1; min-width:0; }
+  .wrow { display:flex; align-items:center; gap:8px; padding:8px 0; font-size:13px; font-weight:500; border-bottom:1px solid var(--line); }
+  .wrow:last-child { border-bottom:0; }
+  .wrow i { flex:none; width:11px; height:11px; border-radius:4px; display:block; }
+  .wrow span { flex:1; }
+  .wrow b { font-variant-numeric:tabular-nums; font-weight:650; white-space:nowrap; }
+  .anim .arc { animation:draw .9s cubic-bezier(.3,.7,.2,1) both; }
+  @keyframes draw { from { stroke-dasharray:0 var(--c); } }
+  @media (prefers-reduced-motion: reduce) { .anim .arc { animation:none; } }
+  .blks { margin-top:12px; display:flex; flex-direction:column; gap:6px; }
+  .blk { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; background:var(--soft); border-radius:14px; padding:9px 11px; }
+  .blk i { flex:none; width:11px; height:11px; border-radius:4px; display:block; }
+  .blk span b { font-weight:650; }
+  .legend { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .lg { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; background:var(--soft); border-radius:20px; padding:5px 11px 5px 8px; }
+  .lg i { width:11px; height:11px; border-radius:4px; display:block; }
+  .nudge { display:flex; align-items:center; gap:12px; }
+  .nudge .nt { flex:1; min-width:0; }
+  .nudge b { display:block; font-size:16px; font-weight:650; letter-spacing:-.012em; }
+  .nudge span { font-size:13px; font-weight:500; opacity:.88; }
+  .nudge button { flex:none; border:0; border-radius:14px; padding:10px 15px; font:inherit; font-weight:650; font-size:14px; cursor:pointer; color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.25); }
+  .warn { background:var(--warn-bg); color:var(--warn-fg); font-size:14px; font-weight:600; }
+
+  /* year strip */
+  .strip { position:relative; height:34px; border-radius:12px; overflow:hidden; display:flex; }
+  .strip .m { flex:1; }
+  .strip .m:nth-child(odd) { background:var(--m1); }
+  .strip .m:nth-child(even) { background:var(--m2); }
+  .strip .mk { position:absolute; top:0; bottom:0; }
+  .strip .lv { position:absolute; top:5px; bottom:5px; border-radius:6px; }
+  .strip .today { position:absolute; top:0; bottom:0; width:3px; background:var(--pink); }
+  .mlab { display:flex; margin-top:5px; }
+  .mlab div { flex:1; text-align:center; font-size:11px; font-weight:600; color:var(--mute); }
+
+  /* next up */
+  .next { background:linear-gradient(135deg,var(--next1),var(--next2)); }
+  .nrow { display:flex; align-items:center; gap:14px; }
+  .cd { margin-left:auto; text-align:right; flex:none; }
+  .cd b { display:block; font-size:34px; line-height:1; font-weight:300; color:var(--mintDeep); letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+  .cd span { font-size:12px; font-weight:600; color:var(--mute); }
+  .dbadge { flex:none; width:54px; height:58px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.05; box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+  .dbadge b { font-size:22px; font-weight:700; letter-spacing:-.02em; }
+  .dbadge span { font-size:12px; font-weight:600; }
+
+  /* other absence */
+  .moonrow { display:flex; align-items:center; gap:14px; }
+  .moonrow svg { flex:none; filter:drop-shadow(0 4px 12px rgba(255,214,102,.45)); }
+  .moonrow .mt { flex:1; min-width:0; }
+  .moonrow .mt b { display:block; font-size:16px; font-weight:650; letter-spacing:-.012em; }
+  .moonrow .mt span { display:block; font-size:13px; color:var(--mute); margin-top:2px; }
+  .moonrow .cd b { color:#D99A0B; }
+  .moonnext { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--mute); }
+  .moonnext b { color:var(--ink); font-weight:650; }
+  .tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .tile { border-radius:16px; padding:12px 8px; text-align:center; }
+  .tile b { display:block; font-size:26px; font-weight:300; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .tile span { font-size:12px; font-weight:600; }
+
+  /* forms */
+  label { display:block; font-size:13px; font-weight:600; color:var(--mute); margin-bottom:5px; }
+  input[type=text], input[type=number], input[type=date], select { width:100%; font:inherit; font-size:16px; padding:11px 12px; border:1px solid var(--line); border-radius:14px; background:var(--input); color:var(--ink); min-height:48px; transition:border-color .15s, box-shadow .15s; }
+  input:focus, select:focus { outline:none; border-color:var(--violet); background:var(--card); box-shadow:0 0 0 4px rgba(124,58,237,.16); }
+  button:focus-visible { outline:3px solid var(--pink); outline-offset:2px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  .row > div { min-width:0; }
+  input[type=date] { min-width:0; -webkit-appearance:none; appearance:none; }
+  .btn { border:0; background:linear-gradient(135deg,#4338CA,#7C3AED); color:#fff; font:inherit; font-weight:650; padding:14px 16px; border-radius:16px; width:100%; cursor:pointer; font-size:16px; letter-spacing:-.01em; box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 10px 20px -8px rgba(124,58,237,.55); transition:transform .12s; }
+  .btn:active { transform:scale(.98); }
+  .btn.soft { background:var(--soft2); color:var(--accent); box-shadow:none; margin-top:8px; }
+  .btn.danger { background:linear-gradient(135deg,#F43F5E,#EC4899); box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 10px 20px -8px rgba(244,63,94,.5); }
+  .btn.ghost { background:transparent; color:var(--rose); width:auto; padding:8px 10px; font-size:13px; font-weight:600; box-shadow:none; }
+  .check { display:flex; align-items:center; gap:10px; color:var(--ink); margin-bottom:12px; font-size:15px; font-weight:500; }
+  .check input { width:22px; height:22px; accent-color:var(--violet); }
+  .err { color:var(--err); font-size:14px; font-weight:600; margin:6px 0 10px; }
+  .err:empty { display:none; }
+  .preview { background:var(--prev-bg); color:var(--prev-fg); font-weight:600; font-size:14px; border-radius:12px; padding:10px 12px; margin-bottom:12px; }
+  .preview:empty { display:none; }
+
+  /* leave list */
+  .leave { display:flex; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+  .leave:last-child { border-bottom:0; }
+  .lbody { flex:1; min-width:0; }
+  .ltitle { font-size:15px; font-weight:650; letter-spacing:-.012em; display:flex; justify-content:space-between; gap:8px; }
+  .lact { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+  .statusSel { color-scheme:light dark; width:auto; font-size:13px; font-weight:650; padding:6px 10px; border:none; border-radius:20px; min-height:34px; }
+  .empty { color:var(--mute); font-size:14px; padding:8px 0; }
+  .stat { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); font-size:14px; gap:8px; }
+  .stat:last-child { border-bottom:0; }
+  .chip { display:inline-block; font-size:12px; padding:3px 10px; border-radius:20px; font-weight:650; }
+
+  /* long-weekend tips */
+  .tip { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .tip:first-of-type { padding-top:2px; }
+  .tip:last-child { border-bottom:0; padding-bottom:0; }
+  .tipn { flex:none; width:56px; height:58px; border-radius:16px; background:var(--mint); color:#053F39; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+  .tipn b { font-size:24px; font-weight:600; letter-spacing:-.03em; }
+  .tipn span { font-size:10px; font-weight:600; margin-top:3px; }
+  .tipt { flex:1; min-width:0; }
+  .tipt b { display:block; font-size:14px; font-weight:650; letter-spacing:-.01em; }
+  .tipt span { display:block; font-size:12px; color:var(--mute); margin-top:2px; line-height:1.35; }
+  .chipbtn { flex:none; border:0; border-radius:14px; padding:9px 14px; background:var(--soft2); color:var(--accent); font:inherit; font-weight:650; font-size:13px; cursor:pointer; }
+  .chipbtn:active { transform:scale(.97); }
+
+  /* calendar */
+  .calhead { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .calhead b { font-size:17px; font-weight:650; letter-spacing:-.015em; }
+  .calhead .navb { border:0; width:40px; height:40px; border-radius:14px; background:var(--soft2); color:var(--accent); font:inherit; font-size:22px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .calhead .navb:active { transform:scale(.95); }
+  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+  .dow { text-align:center; font-size:11px; font-weight:600; color:var(--mute); padding-bottom:3px; }
+  .day { position:relative; aspect-ratio:1; border:0; border-radius:12px; font:inherit; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; background:var(--soft); color:var(--ink); padding:0; cursor:pointer; font-variant-numeric:tabular-nums; }
+  .day .moon { position:absolute; right:2px; bottom:1px; font-size:9px; line-height:1; filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); pointer-events:none; }
+  .day.blank { background:transparent; cursor:default; }
+  .day.we { background:transparent; color:var(--mute); font-weight:500; }
+  .day.bh { background:var(--lav); color:#3B0764; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+  .day.appr { background:var(--indigo); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+  .day.pend { background:var(--amber); color:#4A2E00; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+  .day.oth { background:var(--rose); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+  .day.half { background-image:linear-gradient(135deg,transparent 52%,rgba(255,255,255,.5) 52%); }
+  .day.today { outline:2px solid var(--pink); outline-offset:2px; }
+  .todaybtn { border:0; background:transparent; color:var(--accent); font:inherit; font-weight:650; font-size:13px; cursor:pointer; padding:6px 4px; }
+
+  /* backup */
+  .filebtn { display:block; text-align:center; }
+  .twin { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .twin .btn { padding:12px 8px; font-size:14px; }
+  textarea.code { width:100%; font:inherit; font-size:13px; padding:11px 12px; border:1px solid var(--line); border-radius:14px; background:var(--input); color:var(--ink); min-height:76px; resize:vertical; margin-top:10px; }
+  textarea.code:focus { outline:none; border-color:var(--violet); box-shadow:0 0 0 4px rgba(124,58,237,.16); }
+
+  /* bottom nav: frosted glass */
+  .nav { z-index:20; position:fixed; left:0; right:0; bottom:0; display:flex; justify-content:center; padding:0 14px calc(12px + env(safe-area-inset-bottom)); pointer-events:none; }
+  .navIn { pointer-events:auto; width:100%; max-width:420px; background:var(--glass); -webkit-backdrop-filter:blur(22px) saturate(1.7); backdrop-filter:blur(22px) saturate(1.7); border:1px solid var(--hair); border-radius:28px; display:flex; padding:6px; gap:4px; box-shadow:0 14px 34px -12px rgba(27,26,63,.4); }
+  .tab { flex:1; min-width:0; border:0; background:transparent; padding:9px 2px 7px; border-radius:22px; font:inherit; font-size:12px; font-weight:600; color:var(--mute); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; transition:background .2s, color .2s; }
+  .tab svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .tab[aria-selected="true"] { background:linear-gradient(135deg,#4338CA,#7C3AED); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.24); }
+
+  .toast { max-width:90%; text-align:center; position:fixed; left:50%; bottom:calc(104px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--toast-bg); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); color:var(--toast-fg); font-weight:600; font-size:14px; padding:10px 18px; border-radius:20px; z-index:30; }
 </style>
 </head>
 <body>
-<div id="hud"><span id="score">0</span><span id="coins">🪙 0</span><span id="best">Best 0</span></div>
-<div id="msg"><h1>Neon Runner</h1><p>Swipe left/right to change lanes</p><p>Swipe up to jump</p><div class="btn">Tap to start</div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<div id="app"></div>
 <script>
-(function(){
-var scene=new THREE.Scene();
-scene.background=new THREE.Color(0x0b1020);
-scene.fog=new THREE.Fog(0x0b1020,20,70);
-var cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,100);
-cam.position.set(0,4,7);cam.lookAt(0,0.5,-6);
-var ren=new THREE.WebGLRenderer({antialias:true});
-ren.setPixelRatio(Math.min(devicePixelRatio,2));
-ren.shadowMap.enabled=true;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.2;
-try{(function(){var c=document.createElement('canvas');c.width=256;c.height=128;var x=c.getContext('2d');var gr=x.createLinearGradient(0,0,0,128);gr.addColorStop(0,'#2a3f8f');gr.addColorStop(.45,'#8fb0ff');gr.addColorStop(.5,'#ff7ac8');gr.addColorStop(.55,'#1a2040');gr.addColorStop(1,'#0b1020');x.fillStyle=gr;x.fillRect(0,0,256,128);var t=new THREE.CanvasTexture(c);t.mapping=THREE.EquirectangularReflectionMapping;var p=new THREE.PMREMGenerator(ren);scene.environment=p.fromEquirectangular(t).texture;p.dispose()})()}catch(e){}
-ren.setSize(innerWidth,innerHeight);
-document.body.insertBefore(ren.domElement,document.body.firstChild);
-scene.add(new THREE.HemisphereLight(0xaaccff,0x221133,.9));
-var sun=new THREE.DirectionalLight(0xffffff,.8);sun.position.set(3,8,5);scene.add(sun);
-sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);var sc=sun.shadow.camera;sc.left=-8;sc.right=8;sc.top=8;sc.bottom=-8;sc.near=1;sc.far=30;
+(function () {
+  "use strict";
+  var KEY = "annual-leave-tracker-v1";
+  var TYPES = ["Annual Leave", "Sick", "Unpaid", "Other"];
+  var STATUSES = ["Pending", "Approved", "Rejected"];
+  var MONTHS = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+  var TYPE_COL = {
+    "Annual Leave":["var(--ta-bg)","var(--ta-fg)"], "Sick":["var(--ts-bg)","var(--ts-fg)"], "Unpaid":["var(--tu-bg)","var(--tu-fg)"], "Other":["var(--to-bg)","var(--to-fg)"]
+  };
 
-var LANES=[-2.2,0,2.2];
-var floor=new THREE.Mesh(new THREE.PlaneGeometry(8,200),new THREE.MeshLambertMaterial({color:0x141b3a}));
-floor.rotation.x=-Math.PI/2;floor.position.z=-80;floor.receiveShadow=true;scene.add(floor);
-
-var stripes=[];
-var stripeMat=new THREE.MeshBasicMaterial({color:0x35e0ff});
-for(var i=0;i<20;i++){
-  [-1.1,1.1].forEach(function(x){
-    var s=new THREE.Mesh(new THREE.BoxGeometry(.08,.02,2.5),stripeMat);
-    s.position.set(x,.02,-i*5);scene.add(s);stripes.push(s);
-  });
-}
-
-var car=new THREE.Group();
-var paint=new THREE.MeshPhysicalMaterial({color:0xf5f5f2,metalness:.25,roughness:.3,clearcoat:1,clearcoatRoughness:.08});
-var glassMat=new THREE.MeshPhysicalMaterial({color:0x0a0d14,metalness:.9,roughness:.08});
-var tailMat=new THREE.MeshStandardMaterial({color:0x2a0a10,emissive:0xff0010,emissiveIntensity:.15,roughness:.2,metalness:.5});
-function put(g,mat,x,y,z){var m=new THREE.Mesh(g,mat);m.position.set(x,y,z);car.add(m);return m}
-function box(w,h,d){return new THREE.BoxGeometry(w,h,d)}
-function prof(pts,w,bev){
-  var s=new THREE.Shape();pts.forEach(function(p,i){i?s.lineTo(p[0],p[1]):s.moveTo(p[0],p[1])});
-  var d=w-2*bev;
-  var g=new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:bev>0,bevelThickness:bev,bevelSize:bev,bevelSegments:3});
-  g.translate(0,0,-d/2);g.rotateY(-Math.PI/2);return g}
-put(prof([[-1.3,-.38],[-1.34,-.15],[-1.26,.03],[-.6,.13],[.85,.14],[1.28,.14],[1.33,-.08],[1.3,-.38]],1.3,.04),paint,0,0,0);
-put(prof([[-.58,.13],[-.2,.5],[.5,.5],[.88,.14]],1.18,0),glassMat,0,0,0);
-put(box(1.12,.05,.74),paint,0,.525,.15);
-put(box(1.2,.36,.07),paint,0,.31,.12);
-put(box(1.3,.05,.22),paint,0,.18,1.12);
-put(box(.46,.15,.05),tailMat,-.43,.04,1.345);
-put(box(.46,.15,.05),tailMat,.43,.04,1.345);
-put(box(.4,.12,.05),new THREE.MeshStandardMaterial({color:0x1a0a0e,roughness:.4}),0,.03,1.345);
-put(box(.4,.13,.03),new THREE.MeshStandardMaterial({color:0x15171c}),0,-.24,1.34);
-put(box(.07,.3,.02),new THREE.MeshBasicMaterial({color:0xdd1122}),.35,-.3,1.36);
-put(box(.4,.1,.05),new THREE.MeshBasicMaterial({color:0xfff6d0}),-.45,-.06,-1.34);
-put(box(.4,.1,.05),new THREE.MeshBasicMaterial({color:0xfff6d0}),.45,-.06,-1.34);
-put(new THREE.CylinderGeometry(.05,.05,.2,10).rotateX(Math.PI/2),new THREE.MeshStandardMaterial({color:0x888888,metalness:.9,roughness:.3}),.42,-.36,1.4);
-var wheels=[];
-var tireMat=new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:.9});
-var rimMat=new THREE.MeshStandardMaterial({color:0x3a3a42,metalness:.8,roughness:.3});
-var spokeMat=new THREE.MeshStandardMaterial({color:0x08080a,metalness:.6,roughness:.4});
-function wheel(x,z){
-  var g=new THREE.Group();
-  g.add(new THREE.Mesh(new THREE.CylinderGeometry(.27,.27,.22,20).rotateZ(Math.PI/2),tireMat));
-  g.add(new THREE.Mesh(new THREE.CylinderGeometry(.19,.19,.23,20).rotateZ(Math.PI/2),rimMat));
-  for(var i=0;i<3;i++){var sp=new THREE.Mesh(box(.24,.36,.05),spokeMat);sp.rotation.x=i*Math.PI/3;g.add(sp)}
-  g.position.set(x,-.23,z);car.add(g);wheels.push(g)}
-wheel(-.68,-.85);wheel(.68,-.85);wheel(-.68,.85);wheel(.68,.85);
-car.traverse(function(m){if(m.isMesh)m.castShadow=true});
-var player=car;
-var air=false;
-var fly=0,flyMat=new THREE.MeshBasicMaterial({color:0x35e0ff,transparent:true,opacity:0,depthWrite:false}),wings=[],glow=new THREE.PointLight(0x35e0ff,0,7);
-glow.position.set(0,-.4,0);car.add(glow);
-[[-.68,-.85],[.68,-.85],[-.68,.85],[.68,.85]].forEach(function(p){var m=new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.03,16),flyMat);m.position.set(p[0],-.52,p[1]);car.add(m)});
-[-1,1].forEach(function(s){var w=new THREE.Mesh(box(.9,.03,.5),flyMat);w.position.set(s*1.1,.12,.15);w.visible=false;car.add(w);wings.push(w)});
-var coins=[],coinCount=0,coinEl=document.getElementById('coins'),coinGeo=new THREE.CylinderGeometry(.35,.35,.08,16).rotateX(Math.PI/2),coinMat=new THREE.MeshStandardMaterial({color:0xffd23f,metalness:.8,roughness:.25,emissive:0x664400,emissiveIntensity:.5});
-function addCoin(x,y,z){var c=new THREE.Mesh(coinGeo,coinMat);c.position.set(x,y,z);scene.add(c);coins.push(c)}
-function burst(n){for(var i=0;i<n;i++){var m=new THREE.Mesh(smokeGeo,smokeMat.clone());m.position.set(player.position.x+(Math.random()-.5)*1.4,.15,(i%2?.85:-.85)+(Math.random()-.5)*.4);m.userData.l=0;m.userData.vx=(Math.random()-.5)*4;scene.add(m);smoke.push(m)}}
-var smoke=[],smokeT=0,smokeMat=new THREE.MeshBasicMaterial({color:0xcfd6e6,transparent:true,opacity:.45,depthWrite:false}),smokeGeo=new THREE.SphereGeometry(.07,6,6);
-function puff(x){var m=new THREE.Mesh(smokeGeo,smokeMat.clone());m.position.set(x,player.position.y-.36,1.55);m.userData.l=0;scene.add(m);smoke.push(m)}
-player.position.set(0,.5,0);scene.add(player);
-
-var obGeo=new THREE.BoxGeometry(1.4,1,1.4);
-var obMat=new THREE.MeshLambertMaterial({color:0xffc233});
-var obs=[];
-
-var lane=1,vy=0,y=0,speed=14,score=0,best=0,running=false,spawnT=0;
-var scoreEl=document.getElementById('score'),bestEl=document.getElementById('best'),msg=document.getElementById('msg');
-
-function reset(){
-  obs.forEach(function(o){scene.remove(o)});obs=[];
-  coins.forEach(function(c){scene.remove(c)});coins=[];coinCount=0;coinEl.textContent='🪙 0';
-  lane=1;y=0;vy=0;speed=14;score=0;spawnT=0;player.rotation.set(0,0,0);
-  player.position.set(0,.5,0);
-}
-function start(){reset();running=true;msg.style.display='none'}
-function die(){
-  running=false;best=Math.max(best,Math.floor(score));
-  bestEl.textContent='Best '+best;
-  msg.querySelector('h1').textContent='Crashed!';
-  msg.querySelectorAll('p')[0].textContent='Score: '+Math.floor(score)+'  🪙 '+coinCount;
-  msg.querySelectorAll('p')[1].textContent='Tap to try again';
-  msg.style.display='flex';
-}
-function spawn(){
-  var n=Math.random()<.3?2:1;
-  var free=Math.floor(Math.random()*3);
-  for(var l=0;l<3;l++){
-    if(n===2&&l===free)continue;
-    if(n===1&&l!==free)continue;
-    var o=new THREE.Mesh(obGeo,obMat);
-    o.position.set(LANES[l],.5,-70);scene.add(o);obs.push(o);
+  // ---- storage (falls back to memory if the browser blocks it) ----
+  var memory = null;
+  // England & Wales bank holidays (Scotland / N. Ireland differ - edit in Settings)
+  var EW = [
+    ["2026-01-01","New Year's Day"],["2026-04-03","Good Friday"],["2026-04-06","Easter Monday"],
+    ["2026-05-04","Early May bank holiday"],["2026-05-25","Spring bank holiday"],["2026-08-31","Summer bank holiday"],
+    ["2026-12-25","Christmas Day"],["2026-12-28","Boxing Day (substitute)"],
+    ["2027-01-01","New Year's Day"],["2027-03-26","Good Friday"],["2027-03-29","Easter Monday"],
+    ["2027-05-03","Early May bank holiday"],["2027-05-31","Spring bank holiday"],["2027-08-30","Summer bank holiday"],
+    ["2027-12-27","Christmas Day (substitute)"],["2027-12-28","Boxing Day (substitute)"]
+  ];
+  function ewList() { return EW.map(function (h) { return { date:h[0], name:h[1] }; }); }
+  function defaults() {
+    return { seeded:true, settings:{ name:"", year:new Date().getFullYear(), entitlement:28, includesBH:true, showMoon:true, carry:0, taken:13, hours:8 }, leaves:[], holidays:ewList() };
   }
-  if(Math.random()<.7){
-    var L=Math.floor(Math.random()*3),blocked=obs.some(function(q){return q.position.z<-69&&Math.abs(q.position.x-LANES[L])<.1});
-    for(var c=0;c<(blocked?3:5);c++)addCoin(LANES[L],blocked?2.7:.8,-70-(blocked?c*1.6-1.6:c*2.2));
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var d = JSON.parse(raw), def = defaults();
+        var out = { seeded:true, settings:Object.assign(def.settings, d.settings), leaves:d.leaves||[], holidays:d.holidays||[] };
+        if (!d.seeded) {
+          if (out.holidays.length === 0) out.holidays = ewList();
+          if (Number(out.settings.entitlement) === 25) out.settings.entitlement = 28;
+        }
+        return out;
+      }
+    } catch (e) { if (memory) return memory; }
+    return defaults();
   }
-}
-function left(){if(lane>0)lane--}
-function right(){if(lane<2)lane++}
-function jump(){if(y<=.01){vy=11;air=true;burst(12)}}
+  function save() {
+    memory = data;
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+  }
 
-var sx=0,sy=0,t0=0;
-addEventListener('touchstart',function(e){var t=e.touches[0];sx=t.clientX;sy=t.clientY;t0=Date.now()},{passive:true});
-addEventListener('touchend',function(e){
-  var t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
-  if(!running){if(Date.now()-t0<400)start();return}
-  if(Math.abs(dx)<20&&Math.abs(dy)<20)return;
-  if(Math.abs(dx)>Math.abs(dy)){dx<0?left():right()}else if(dy<0){jump()}
-},{passive:true});
-addEventListener('mousedown',function(){if(!running)start()});
-addEventListener('keydown',function(e){
-  if(!running){if(e.key===' '||e.key==='Enter')start();return}
-  if(e.key==='ArrowLeft')left();
-  if(e.key==='ArrowRight')right();
-  if(e.key==='ArrowUp'||e.key===' ')jump();
-});
-addEventListener('resize',function(){cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();ren.setSize(innerWidth,innerHeight)});
+  var data = load();
+  var tab = "overview";
+  var form = { start:"", end:"", type:"Annual Leave", half:false, status:"Pending", notes:"" };
+  var error = "";
+  var hol = { date:"", name:"" };
+  var topNote = "";
+  var enterAnim = false;
+  var cal = { y:null, m:null };
+  var REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  var animate = true; // pips pop in once when the app opens
 
-var last=performance.now();
-function loop(now){
-  requestAnimationFrame(loop);
-  var dt=Math.min((now-last)/1000,.05);last=now;
-  if(running){
-    speed+=dt*.25;score+=dt*speed;
-    scoreEl.textContent=Math.floor(score);
-    player.position.x+=(LANES[lane]-player.position.x)*Math.min(1,dt*14);
-    vy-=24*dt;y=Math.max(0,y+vy*dt);if(y===0&&vy<0){vy=0;if(air){air=false;burst(14)}}
-    player.position.y=.5+y;
-    player.rotation.z=0;player.rotation.y+=((player.position.x-LANES[lane])*.25-player.rotation.y)*Math.min(1,dt*12);
-    fly+=((y>.05?1:0)-fly)*Math.min(1,dt*10);
-    var tp=y>.05?Math.max(-.35,Math.min(.35,vy*.035)):0;player.rotation.x+=(tp-player.rotation.x)*Math.min(1,dt*8);
-    flyMat.opacity=.85*fly*(.8+.2*Math.random());glow.intensity=2.5*fly;
-    wings.forEach(function(w,i){w.visible=fly>.02;w.scale.x=Math.max(.001,fly);w.position.x=(i?1:-1)*(.65+.45*fly)});
-    tailMat.emissiveIntensity=Math.abs(player.position.x-LANES[lane])>.15?1.6:.15;
-    wheels.forEach(function(w){w.rotation.x-=speed*dt/.27});
-    smokeT-=dt;if(smokeT<=0){smokeT=.05;puff(player.position.x+.42)}
-    for(var k=smoke.length-1;k>=0;k--){var sm=smoke[k];sm.userData.l+=dt;sm.position.z+=speed*dt;sm.position.y+=.5*dt;sm.position.x+=(sm.userData.vx||0)*dt;sm.scale.setScalar(1+sm.userData.l*5);sm.material.opacity=Math.max(0,.45-sm.userData.l*.6);if(sm.userData.l>.75){scene.remove(sm);sm.material.dispose();smoke.splice(k,1)}}
-    spawnT-=dt;
-    if(spawnT<=0){spawn();spawnT=Math.max(.45,1.1-speed*.02)+Math.random()*.4}
-    for(var i=obs.length-1;i>=0;i--){
-      var o=obs[i];o.position.z+=speed*dt;
-      if(Math.abs(o.position.z)<1.1&&Math.abs(o.position.x-player.position.x)<1.1&&y<.9){die();break}
-      if(o.position.z>10){scene.remove(o);obs.splice(i,1)}
+  // ---- helpers ----
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function toStr(d) { return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
+  function parse(s) { var p = s.split("-").map(Number); return new Date(p[0], p[1]-1, p[2]); }
+  function fmt(s, y) {
+    var o = { weekday:"short", day:"numeric", month:"short" };
+    if (y) o.year = "numeric";
+    return parse(s).toLocaleDateString("en-GB", o);
+  }
+  function mon(s) { return parse(s).toLocaleDateString("en-GB", { month:"short" }); }
+  function num(n) { return String(Math.round(n * 10) / 10); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+  function year() { return Number(data.settings.year) || new Date().getFullYear(); }
+  function holidaySet() { var s = {}; data.holidays.forEach(function (h) { s[h.date] = 1; }); return s; }
+
+  function workingDays(start, end, hs, half, clipYear) {
+    if (!start || !end) return 0;
+    var s = parse(start), e = parse(end);
+    if (e < s) return 0;
+    if (clipYear) {
+      var ys = new Date(clipYear, 0, 1), ye = new Date(clipYear, 11, 31);
+      if (s < ys) s = ys;
+      if (e > ye) e = ye;
+      if (e < s) return 0;
     }
-    stripes.forEach(function(s){s.position.z+=speed*dt;if(s.position.z>6)s.position.z-=100});
-    for(var j=coins.length-1;j>=0;j--){var cn=coins[j];cn.position.z+=speed*dt;cn.rotation.y+=dt*5;
-      if(Math.abs(cn.position.z)<1.2&&Math.abs(cn.position.x-player.position.x)<1&&Math.abs(cn.position.y-player.position.y)<1.2){scene.remove(cn);coins.splice(j,1);coinCount++;score+=20;coinEl.textContent='🪙 '+coinCount}
-      else if(cn.position.z>10){scene.remove(cn);coins.splice(j,1)}}
-  }else{
-    player.rotation.y+=dt;
+    var count = 0;
+    for (var d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+      var wd = d.getDay();
+      if (wd === 0 || wd === 6) continue;
+      if (hs[toStr(d)]) continue;
+      count++;
+    }
+    if (half && start === end && count > 0) count -= 0.5;
+    return count;
   }
-  ren.render(scene,cam);
-}
-requestAnimationFrame(loop);
+
+  function computed() {
+    var hs = holidaySet(), y = year();
+    var items = data.leaves.map(function (l) {
+      return Object.assign({}, l, { days:workingDays(l.start, l.end, hs, l.half), yearDays:workingDays(l.start, l.end, hs, l.half, y) });
+    });
+    function sum(t, st) { return items.filter(function (l) { return l.type === t && l.status === st; }).reduce(function (a, l) { return a + l.yearDays; }, 0); }
+    var available = Number(data.settings.entitlement || 0) + Number(data.settings.carry || 0);
+    var used = sum("Annual Leave", "Approved"), pending = sum("Annual Leave", "Pending");
+    var bhList = [];
+    if (data.settings.includesBH) {
+      data.holidays.forEach(function (h) {
+        var d = parse(h.date), wd = d.getDay();
+        if (d.getFullYear() === y && wd !== 0 && wd !== 6) bhList.push(h);
+      });
+      bhList.sort(function (a, b) { return a.date.localeCompare(b.date); });
+    }
+    var bh = bhList.length;
+    var approvedDays = [], pendingDays = [];
+    items.forEach(function (l) {
+      if (l.type !== "Annual Leave" || (l.status !== "Approved" && l.status !== "Pending")) return;
+      var s0 = parse(l.start), e0 = parse(l.end), ys = new Date(y, 0, 1), ye = new Date(y, 11, 31);
+      if (s0 < ys) s0 = ys;
+      if (e0 > ye) e0 = ye;
+      var w = (l.half && l.start === l.end) ? 0.5 : 1;
+      for (var d = new Date(s0); d <= e0; d.setDate(d.getDate() + 1)) {
+        var wd = d.getDay();
+        if (wd === 0 || wd === 6 || hs[toStr(d)]) continue;
+        (l.status === "Approved" ? approvedDays : pendingDays).push({ date:toStr(d), w:w });
+      }
+    });
+    var taken = Number(data.settings.taken || 0);
+    var left = available - bh - taken - used;
+    return { items:items, sum:sum, available:available, bh:bh, bhList:bhList, approvedDays:approvedDays, pendingDays:pendingDays, taken:taken, used:used, pending:pending, remaining:left, remainingIfAll:left - pending, hs:hs };
+  }
+
+  function chipStyle(s) {
+    var k = { Approved:"ok", Pending:"pd", Rejected:"rj" }[s];
+    return "color:var(--" + k + "-fg);background:var(--" + k + "-bg);";
+  }
+  function opts(list, sel) { return list.map(function (o) { return "<option" + (o === sel ? " selected" : "") + ">" + o + "</option>"; }).join(""); }
+
+  var ICON = {
+    overview:'<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>',
+    calendar:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3.5"/><path d="M8 3v4M16 3v4M4 10.5h16"/></svg>',
+    log:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+    settings:'<svg viewBox="0 0 24 24"><path d="M4 7h9M18 7h2M4 17h2M11 17h9"/><circle cx="15.5" cy="7" r="2.5"/><circle cx="8.5" cy="17" r="2.5"/></svg>'
+  };
+
+  // ---- views ----
+  function shortName(n) {
+    return String(n).replace(/ bank holiday/i, "").replace(/\s*\(.*\)/, "").replace("Christmas Day", "Christmas")
+      .replace("New Year's Day", "New Year").replace("Easter Monday", "Easter Mon").replace("Good Friday", "Good Fri").trim();
+  }
+  function dm(s) { var d = parse(s); return d.getDate() + " " + mon(s); }
+
+  function pipsHtml(c) {
+    var total = Math.max(1, Math.ceil(c.available));
+    var segs = [], at = 0;
+    function push(cls, w, date, info, sub) { segs.push({ cls:cls, s:at, e:at + w, date:date, info:info, sub:sub }); at += w; }
+    c.bhList.forEach(function (h) { push("bh", 1, h.date, fmt(h.date, true) + " · " + h.name, shortName(h.name)); });
+    if (c.taken > 0) push("taken", c.taken, "", "", "");
+    c.approvedDays.forEach(function (d) { push("taken", d.w, d.date, fmt(d.date, true) + " · Annual leave (approved)", "Leave"); });
+    c.pendingDays.forEach(function (d) { push("pending", d.w, d.date, fmt(d.date, true) + " · Annual leave (pending)", "Pending"); });
+    var out = "";
+    for (var i = 0; i < total; i++) {
+      var m = i + 0.5, seg = null;
+      for (var k = 0; k < segs.length; k++) { if (m >= segs[k].s && m < segs[k].e) { seg = segs[k]; break; } }
+      if (seg && seg.date) {
+        out += '<button class="pip lbl ' + seg.cls + '" style="--i:' + i + '" data-act="bhinfo" data-info="' + esc(seg.info) + '"><b>' + dm(seg.date) + "</b><small>" + esc(seg.sub) + "</small></button>";
+      } else {
+        out += '<div class="pip ' + (seg ? seg.cls : "free") + '" style="--i:' + i + '"></div>';
+      }
+    }
+    return out;
+  }
+
+  function wheelCard(c) {
+    var A = c.available;
+    var bhN = c.bh, tkN = c.taken + c.used, pdN = c.pending;
+    var frBooked = Math.max(0, A - bhN - tkN - pdN);
+    function pc(n) { return A > 0 ? Math.round(n / A * 100) : 0; }
+    var pB = pc(bhN), pT = pc(tkN), pP = pc(pdN), pF = A > 0 ? Math.max(0, 100 - pB - pT - pP) : 0;
+    var usedPct = pc(bhN + tkN);
+    var R = 50, CIRC = 2 * Math.PI * R;
+    var segs = [[bhN, "#C084FC"], [tkN, "var(--indigo)"], [pdN, "#FFB020"], [frBooked, "#2DD4BF"]];
+    var off = 0, arcs = "";
+    segs.forEach(function (sg) {
+      var len = A > 0 ? Math.min(CIRC - off, Math.max(0, sg[0] / A * CIRC)) : 0;
+      if (len > 0.5) {
+        arcs += '<circle class="arc" cx="66" cy="66" r="' + R + '" stroke-dasharray="' + len + " " + CIRC + '" stroke-dashoffset="' + (-off) + '" style="--c:' + CIRC + ";stroke:" + sg[1] + '"/>';
+      }
+      off += len;
+    });
+    var rows = [["#C084FC", "Bank holidays", bhN, pB], ["var(--indigo)", "Taken", tkN, pT], ["#FFB020", "Pending", pdN, pP], ["#2DD4BF", "Not booked", frBooked, pF]].map(function (r) {
+      return '<div class="wrow"><i style="background:' + r[0] + '"></i><span>' + r[1] + "</span><b>" + num(r[2]) + "d · " + r[3] + "%</b></div>";
+    }).join("");
+    return '<div class="card"><h2>Allowance used</h2><div class="wheelRow' + (animate ? " anim" : "") + '">' +
+      '<svg width="120" height="120" viewBox="0 0 132 132" role="img" aria-label="' + usedPct + ' percent of your allowance used">' +
+      '<circle cx="66" cy="66" r="' + R + '" fill="none" style="stroke:var(--track)" stroke-width="16"/>' +
+      '<g transform="rotate(-90 66 66)" fill="none" stroke-width="16">' + arcs + "</g>" +
+      '<text x="66" y="70" text-anchor="middle" font-size="28" font-weight="300" letter-spacing="-1" data-count="' + usedPct + '" data-suffix="%" style="fill:var(--ink)">' + usedPct + '%</text>' +
+      '<text x="66" y="88" text-anchor="middle" font-size="11" font-weight="600" style="fill:var(--mute)">used</text></svg>' +
+      '<div class="wlist">' + rows + "</div></div></div>";
+  }
+
+  // ---- long-weekend tips: find short gaps of working days that join bank holidays / weekends into long breaks ----
+  function bridgeTips(c) {
+    if (c.remainingIfAll <= 0) return [];
+    var y = year(), hs = c.hs, now0 = new Date(), todayIso = toStr(new Date(now0.getFullYear(), now0.getMonth(), now0.getDate()));
+    var booked = {};
+    c.approvedDays.concat(c.pendingDays).forEach(function (d) { booked[d.date] = 1; });
+    var days = [], d = new Date(y, 0, 1);
+    while (d.getFullYear() === y) {
+      var wd = d.getDay(), iso = toStr(d);
+      days.push({ iso:iso, off:(wd === 0 || wd === 6 || !!hs[iso]), bh:(!!hs[iso] && wd !== 0 && wd !== 6) });
+      d.setDate(d.getDate() + 1);
+    }
+    var runs = [], i = 0;
+    while (i < days.length) {
+      if (!days[i].off) { i++; continue; }
+      var j = i, bh = false;
+      while (j < days.length && days[j].off) { if (days[j].bh) bh = true; j++; }
+      runs.push({ s:i, e:j - 1, bh:bh });
+      i = j;
+    }
+    var out = [];
+    for (var r = 0; r + 1 < runs.length; r++) {
+      var a = runs[r], b = runs[r + 1], g = b.s - a.e - 1;
+      if (g < 1 || g > 4 || !(a.bh || b.bh)) continue;
+      var gap = days.slice(a.e + 1, b.s);
+      if (gap[0].iso < todayIso) continue;
+      var need = [];
+      gap.forEach(function (x, k) { if (!booked[x.iso]) need.push(k); });
+      if (need.length === 0 || need.length > c.remainingIfAll) continue;
+      var contiguous = need[need.length - 1] - need[0] === need.length - 1;
+      if (!contiguous) continue;
+      var total = b.e - a.s + 1;
+      if (total < 4) continue;
+      out.push({ start:gap[need[0]].iso, end:gap[need[need.length - 1]].iso, leaveDays:need.length, total:total, from:days[a.s].iso, to:days[b.e].iso, score:total / need.length });
+    }
+    out.sort(function (p, q) { return q.score - p.score || p.start.localeCompare(q.start); });
+    return out.slice(0, 3);
+  }
+
+  function rangeText(a, b) {
+    if (a === b) return dm(a);
+    var pa = parse(a), pb = parse(b);
+    return pa.getMonth() === pb.getMonth() ? pa.getDate() + "–" + dm(b) : dm(a) + " – " + dm(b);
+  }
+
+  function tipsCard(c) {
+    var tips = bridgeTips(c);
+    if (!tips.length) return "";
+    return '<div class="card"><h2>Make your days go further</h2><div class="sub" style="margin:-6px 0 10px">Book around bank holidays for longer breaks.</div>' +
+      tips.map(function (t) {
+        return '<div class="tip"><div class="tipn"><b>' + t.total + "</b><span>days off</span></div>" +
+          '<div class="tipt"><b>Take ' + rangeText(t.start, t.end) + "</b><span>" + t.leaveDays + (t.leaveDays === 1 ? " day" : " days") + " of leave gives you <i style=\"font-style:normal;white-space:nowrap\">" + rangeText(t.from, t.to) + "</i> off</span></div>" +
+          '<button class="chipbtn" data-act="tip" data-start="' + t.start + '" data-end="' + t.end + '">Book</button></div>';
+      }).join("") + "</div>";
+  }
+
+  // ---- month calendar ----
+  var MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  // ---- moon phase (approximate): marks the day the moon turns full, accurate to within about a day ----
+  var SYNODIC = 29.530588853;
+  var KNOWN_NEW_MOON = Date.UTC(2000, 0, 6, 18, 14, 0);
+  function moonAge(d) {
+    var diffDays = (d.getTime() - KNOWN_NEW_MOON) / 86400000;
+    return ((diffDays % SYNODIC) + SYNODIC) % SYNODIC;
+  }
+  function isFullMoonDay(y, m, day) {
+    var a0 = moonAge(new Date(y, m, day, 12, 0, 0));
+    var a1 = moonAge(new Date(y, m, day + 1, 12, 0, 0));
+    if (a1 < a0) a1 += SYNODIC;
+    return a0 <= SYNODIC / 2 && a1 > SYNODIC / 2;
+  }
+
+  function calView(c) {
+    var now = new Date();
+    if (cal.y === null) {
+      if (now.getFullYear() === year()) { cal.y = now.getFullYear(); cal.m = now.getMonth(); }
+      else { cal.y = year(); cal.m = 0; }
+    }
+    var y = cal.y, m = cal.m, todayIso = toStr(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+    var first = new Date(y, m, 1), dim = new Date(y, m + 1, 0).getDate(), offset = (first.getDay() + 6) % 7;
+    var hs = c.hs, holName = {};
+    data.holidays.forEach(function (h) { holName[h.date] = h.name; });
+    var cells = "";
+    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function (n) { cells += '<div class="dow">' + n + "</div>"; });
+    for (var i = 0; i < offset; i++) cells += '<div class="day blank"></div>';
+    for (var d = 1; d <= dim; d++) {
+      var dt = new Date(y, m, d), iso = toStr(dt), wd = dt.getDay(), weekend = (wd === 0 || wd === 6);
+      var cls = "day", info = fmt(iso, true);
+      if (weekend) cls += " we";
+      else if (hs[iso]) { cls += " bh"; info += " · " + (holName[iso] || "Bank holiday"); }
+      else {
+        var hit = null;
+        c.items.forEach(function (l) {
+          if (l.status === "Rejected" || l.start > iso || l.end < iso) return;
+          var rank = l.type === "Annual Leave" ? (l.status === "Approved" ? 3 : 2) : 1;
+          if (!hit || rank > hit.rank) hit = { l:l, rank:rank };
+        });
+        if (hit) {
+          cls += hit.l.type === "Annual Leave" ? (hit.l.status === "Approved" ? " appr" : " pend") : " oth";
+          if (hit.l.half && hit.l.start === hit.l.end) cls += " half";
+          info += " · " + hit.l.type + " (" + hit.l.status.toLowerCase() + ")" + (hit.l.half && hit.l.start === hit.l.end ? ", half day" : "");
+        }
+      }
+      if (iso === todayIso) cls += " today";
+      var moon = data.settings.showMoon !== false && isFullMoonDay(y, m, d);
+      if (moon) info += " · Full moon";
+      cells += '<button class="' + cls + '" data-act="bhinfo" data-info="' + esc(info) + '" aria-label="' + esc(info) + '">' + d + (moon ? '<span class="moon" aria-hidden="true">\ud83c\udf15</span>' : "") + "</button>";
+    }
+    // this month's list
+    var mStart = toStr(new Date(y, m, 1)), mEnd = toStr(new Date(y, m, dim)), list = "";
+    data.holidays.filter(function (h) { var w = parse(h.date).getDay(); return h.date >= mStart && h.date <= mEnd && w !== 0 && w !== 6; })
+      .forEach(function (h) { list += '<div class="blk"><i style="background:var(--lav)"></i><span><b>' + dm(h.date) + "</b> " + esc(h.name) + "</span></div>"; });
+    c.items.filter(function (l) { return l.status !== "Rejected" && l.end >= mStart && l.start <= mEnd; }).forEach(function (l) {
+      var col = l.type === "Annual Leave" ? (l.status === "Approved" ? "var(--indigo)" : "var(--amber)") : "var(--rose)";
+      list += '<div class="blk"><i style="background:' + col + '"></i><span><b>' + esc(l.type) + "</b> " + rangeText(l.start, l.end) + " · " + esc(l.status.toLowerCase()) + "</span></div>";
+    });
+    var isNow = now.getFullYear() === y && now.getMonth() === m;
+    return '<div class="card"><div class="calhead"><button class="navb" data-act="calprev" aria-label="Previous month">‹</button>' +
+      '<div style="text-align:center"><b>' + MONTH_NAMES[m] + " " + y + "</b>" + (isNow ? "" : '<div><button class="todaybtn" data-act="caltoday">Back to today</button></div>') + "</div>" +
+      '<button class="navb" data-act="calnext" aria-label="Next month">›</button></div>' +
+      '<div class="cal">' + cells + "</div>" +
+      '<div class="legend"><span class="lg"><i style="background:var(--lav)"></i>Bank holiday</span><span class="lg"><i style="background:var(--indigo)"></i>Approved</span><span class="lg"><i style="background:var(--amber)"></i>Pending</span><span class="lg"><i style="background:var(--rose)"></i>Sick / other</span>' + (data.settings.showMoon !== false ? '<span class="lg">\ud83c\udf15 Full moon</span>' : "") + "</div></div>" +
+      '<div class="card"><h2>This month</h2>' + (list ? '<div class="blks" style="margin-top:0">' + list + "</div>" : '<div class="empty">Nothing booked this month.</div>') + "</div>";
+  }
+
+  // ---- backup: move data between phone and computer ----
+  function normalize(obj) {
+    var def = defaults(), re = /^\d{4}-\d{2}-\d{2}$/;
+    var settings = Object.assign(def.settings, obj.settings || {});
+    var leaves = (Array.isArray(obj.leaves) ? obj.leaves : []).filter(function (l) { return l && re.test(l.start) && re.test(l.end); }).map(function (l, i) {
+      return { id:l.id || (Date.now() + i), start:l.start, end:l.end, type:TYPES.indexOf(l.type) > -1 ? l.type : "Annual Leave", half:!!l.half, status:STATUSES.indexOf(l.status) > -1 ? l.status : "Pending", notes:String(l.notes || "") };
+    });
+    var holidays = (Array.isArray(obj.holidays) ? obj.holidays : []).filter(function (h) { return h && re.test(h.date); }).map(function (h) { return { date:h.date, name:String(h.name || "Bank holiday") }; });
+    return { seeded:true, settings:settings, leaves:leaves, holidays:holidays };
+  }
+  function makeCode() { return "LEAVE1:" + btoa(unescape(encodeURIComponent(JSON.stringify(data)))); }
+  function readBackup(text) {
+    text = String(text || "").trim();
+    if (text.indexOf("LEAVE1:") === 0) text = decodeURIComponent(escape(atob(text.slice(7).replace(/\s+/g, ""))));
+    var obj = JSON.parse(text);
+    if (!obj || typeof obj !== "object" || !obj.settings || !Array.isArray(obj.leaves)) throw new Error("bad");
+    return normalize(obj);
+  }
+  function restoreFrom(text) {
+    var next;
+    try { next = readBackup(text); } catch (e) { toast("That backup couldn't be read. Check you copied all of it."); return; }
+    var msg = "Replace everything on this device with the backup? It has " + next.leaves.length + " leave entr" + (next.leaves.length === 1 ? "y" : "ies") + " for " + next.settings.year + ".";
+    if (!window.confirm(msg)) return;
+    data = next; save(); cal = { y:null, m:null }; render(); toast("Backup restored");
+  }
+  function saveFile() {
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type:"application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "leave-backup-" + toStr(new Date()) + ".json";
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); if (a.parentNode) a.parentNode.removeChild(a); }, 800);
+    toast("Backup saved to your downloads");
+  }
+  function copyCode() {
+    var code = makeCode();
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = code; ta.style.cssText = "position:fixed;opacity:0;top:0;left:0"; document.body.appendChild(ta); ta.focus(); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      toast(ok ? "Backup code copied" : "Couldn't copy. Use Save backup file instead.");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(function () { toast("Backup code copied"); }, fallback);
+    else fallback();
+  }
+
+  // ---- dashboard: next full moon ----
+  function nextFullMoons(from, count) {
+    var out = [], d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    for (var i = 0; i < 120 && out.length < count; i++) {
+      if (isFullMoonDay(d.getFullYear(), d.getMonth(), d.getDate())) out.push({ iso:toStr(d), days:i });
+      d.setDate(d.getDate() + 1);
+    }
+    return out;
+  }
+  function moonSvg() {
+    return '<svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><defs><radialGradient id="mg" cx="38%" cy="34%" r="75%"><stop offset="0" stop-color="#FFF8DC"/><stop offset="0.6" stop-color="#FFE59A"/><stop offset="1" stop-color="#F2C14E"/></radialGradient></defs>' +
+      '<circle cx="26" cy="26" r="24" fill="url(#mg)"/><circle cx="18" cy="20" r="4.2" fill="#E8B84A" opacity=".5"/><circle cx="33" cy="31" r="5.6" fill="#E8B84A" opacity=".42"/><circle cx="24" cy="36" r="2.6" fill="#E8B84A" opacity=".5"/><circle cx="35" cy="15" r="2.4" fill="#E8B84A" opacity=".4"/></svg>';
+  }
+  function moonCard() {
+    if (data.settings.showMoon === false) return "";
+    var list = nextFullMoons(new Date(), 2);
+    if (!list.length) return "";
+    var a = list[0], b = list[1];
+    var big = a.days === 0 ? "Tonight" : a.days === 1 ? "Tomorrow" : "in " + a.days + " days";
+    var cd = a.days <= 1 ? "" : '<div class="cd"><b data-count="' + a.days + '">' + a.days + "</b><span>days to go</span></div>";
+    return '<div class="card"><h2>Next full moon</h2><div class="moonrow">' + moonSvg() +
+      '<div class="mt"><b>' + fmt(a.iso) + "</b><span>" + big + "</span></div>" + cd + "</div>" +
+      (b ? '<div class="moonnext">Then <b>' + fmt(b.iso) + "</b> · in " + b.days + " days</div>" : "") + "</div>";
+  }
+
+  function overview(c) {
+    var y = year();
+    var yStart = new Date(y, 0, 1).getTime(), span = new Date(y, 11, 31, 23, 59).getTime() - yStart;
+    function pos(s) { return Math.min(100, Math.max(0, (parse(s).getTime() - yStart) / span * 100)); }
+    var ticks = data.holidays.filter(function (h) { return h.date >= y + "-01-01" && h.date <= y + "-12-31"; }).map(function (h) {
+      return '<div class="mk" style="left:' + pos(h.date) + '%;width:' + (100 / 365) + '%;min-width:3px;background:#C084FC"></div>';
+    }).join("");
+    var strip = c.items.filter(function (l) { return l.status !== "Rejected" && l.end >= y + "-01-01" && l.start <= y + "-12-31"; });
+    var now = new Date(), todayPct = now.getFullYear() === y ? (now.getTime() - yStart) / span * 100 : null;
+    var bars = strip.map(function (l) {
+      var a = pos(l.start), b = Math.max(pos(l.end) + 100 / 365, a + 1);
+      var color = l.type === "Annual Leave" ? (l.status === "Approved" ? "var(--indigo)" : "#FFB020") : "#F43F5E";
+      return '<div class="lv" style="left:' + a + '%;width:' + (Math.min(b, 100) - a) + '%;background:' + color + '"></div>';
+    }).join("");
+    var months = ""; for (var i = 0; i < 12; i++) months += '<div class="m"></div>';
+    var mlabels = MONTHS.map(function (m) { return "<div>" + m + "</div>"; }).join("");
+
+    var upcoming = c.items.filter(function (l) { return l.status !== "Rejected" && l.end >= toStr(now); })
+      .sort(function (a, b) { return a.start.localeCompare(b.start); })[0];
+
+    var neg = c.remaining < 0;
+    var warn = c.remainingIfAll < 0
+      ? '<div class="card warn">You\'ve booked ' + num(Math.abs(c.remainingIfAll)) + " more day" + (Math.abs(c.remainingIfAll) === 1 ? "" : "s") + " than your allowance.</div>" : "";
+
+    var nudge = "";
+    if (c.remainingIfAll > 0 && y === now.getFullYear()) {
+      var today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var daysToEnd = Math.max(0, Math.ceil((new Date(y, 11, 31) - today0) / 86400000));
+      var monthsLeft = Math.max(1, Math.ceil(daysToEnd / 30.4));
+      var perMonth = Math.ceil(c.remainingIfAll / monthsLeft * 2) / 2;
+      var tk = daysToEnd <= 30 ? "n3" : daysToEnd <= 90 ? "n2" : "n1";
+      var tone = ["var(--" + tk + "-bg)", "var(--" + tk + "-fg)", "var(--" + tk + "-btn)"];
+      nudge = '<div class="card nudge" style="background:' + tone[0] + ";color:" + tone[1] + '"><div class="nt"><b>' +
+        (c.remainingIfAll === 1 ? "1 day still to book" : num(c.remainingIfAll) + " days still to book") + "</b><span>" +
+        daysToEnd + " days left in " + y + ". Aim for about " + num(perMonth) + (perMonth === 1 ? " day" : " days") + " a month.</span></div>" +
+        '<button data-tab="log" style="background:' + tone[2] + '">Book</button></div>';
+    }
+
+    var blocks = c.items.filter(function (l) {
+      return l.type === "Annual Leave" && (l.status === "Approved" || l.status === "Pending") && l.yearDays > 0;
+    }).map(function (l) {
+      var col = l.status === "Approved" ? "var(--indigo)" : "var(--amber)";
+      return '<div class="blk"><i style="background:' + col + '"></i><span><b>' + l.status + "</b> " + dm(l.start) + (l.end !== l.start ? " – " + dm(l.end) : "") + " · " + num(l.yearDays) + (l.yearDays === 1 ? " day" : " days") + "</span></div>";
+    }).join("");
+
+    var legend = (data.settings.includesBH ? '<span class="lg"><i style="background:var(--lav)"></i>Bank holidays ' + num(c.bh) + "</span>" : "") +
+      '<span class="lg"><i style="background:var(--indigo)"></i>Taken ' + num(c.taken + c.used) + "</span>" +
+      '<span class="lg"><i style="background:var(--amber)"></i>Pending ' + num(c.pending) + "</span>" +
+      '<span class="lg"><i style="background:var(--mint)"></i>Left ' + num(c.remaining) + "</span>";
+
+    var cd = "", cdTop = "";
+    if (upcoming) {
+      var t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var toStart = Math.round((parse(upcoming.start) - t0) / 86400000);
+      var toEnd = Math.round((parse(upcoming.end) - t0) / 86400000);
+      if (toStart > 0) {
+        cd = '<div class="cd"><b data-count="' + toStart + '">' + toStart + "</b><span>day" + (toStart === 1 ? "" : "s") + " to go</span></div>";
+        cdTop = toStart + " day" + (toStart === 1 ? "" : "s") + " until your next break · " + dm(upcoming.start);
+      } else {
+        cd = '<div class="cd"><b data-count="' + (toEnd + 1) + '">' + (toEnd + 1) + "</b><span>day" + (toEnd === 0 ? "" : "s") + " left</span></div>";
+        cdTop = "You're on leave now, until " + dm(upcoming.end);
+      }
+    }
+    topNote = cdTop;
+
+    var nextHtml = upcoming
+      ? '<div class="nrow"><div class="dbadge" style="background:' + TYPE_COL[upcoming.type][0] + ";color:" + TYPE_COL[upcoming.type][1] + '"><b>' + parse(upcoming.start).getDate() + "</b><span>" + mon(upcoming.start) + "</span></div>" +
+        '<div><div style="font-weight:650;font-size:15px">' + esc(upcoming.type) + '</div><div class="sub" style="margin:2px 0 6px">' + fmt(upcoming.start) + (upcoming.end !== upcoming.start ? " to " + fmt(upcoming.end) : "") + " · " + num(upcoming.days) + " day" + (upcoming.days === 1 ? "" : "s") + "</div>" +
+        '<span class="chip" style="' + chipStyle(upcoming.status) + '">' + upcoming.status + "</span></div>" + cd + "</div>"
+      : '<div class="empty">Nothing booked yet. Tap “Log leave” to add your next break.</div>';
+
+    var other = [["Sick","var(--ts-bg)","var(--ts-fg)"],["Unpaid","var(--tu-bg)","var(--tu-fg)"],["Other","var(--to-bg)","var(--to-fg)"]].map(function (t) {
+      return '<div class="tile" style="background:' + t[1] + ";color:" + t[2] + '"><b>' + num(c.sum(t[0], "Approved")) + "</b><span>" + t[0] + "</span></div>";
+    }).join("");
+
+    return '<div class="card hero">' +
+      '<div class="pips' + (animate ? " anim" : "") + '" role="img" aria-label="' + num(c.available) + ' days: ' + num(c.remaining) + ' left">' + pipsHtml(c) + "</div>" +
+      '<div class="legend">' + legend + "</div>" + (blocks ? '<div class="blks">' + blocks + "</div>" : "") + "</div>" + warn + nudge + tipsCard(c) + wheelCard(c) +
+      '<div class="card"><h2>Your year</h2><div class="strip">' + months + ticks + bars +
+      (todayPct !== null ? '<div class="today" style="left:' + todayPct + '%"></div>' : "") + "</div>" +
+      '<div class="mlab">' + mlabels + "</div>" +
+      '<div class="legend" style="margin-top:10px"><span class="lg"><i style="background:var(--indigo)"></i>Approved</span><span class="lg"><i style="background:#FFB020"></i>Pending</span><span class="lg"><i style="background:#F43F5E"></i>Sick / other</span><span class="lg"><i style="background:#C084FC"></i>Bank holiday</span></div></div>' +
+      '<div class="card next"><h2>Next up</h2>' + nextHtml + "</div>" +
+      moonCard() +
+      '<div class="card"><h2>Other time off (approved)</h2><div class="tiles">' + other + "</div></div>";
+  }
+
+  function logView(c) {
+    var list = c.items.length === 0 ? '<div class="empty">No leave logged yet. Add your first break above.</div>' : c.items.map(function (l) {
+      var tc = TYPE_COL[l.type] || TYPE_COL.Other;
+      return '<div class="leave"><div class="dbadge" style="background:' + tc[0] + ";color:" + tc[1] + '"><b>' + parse(l.start).getDate() + "</b><span>" + mon(l.start) + "</span></div>" +
+        '<div class="lbody"><div class="ltitle"><span>' + fmt(l.start) + (l.end !== l.start ? " – " + fmt(l.end) : "") + "</span><span>" + num(l.days) + "d</span></div>" +
+        '<div class="sub" style="margin-top:2px">' + esc(l.type) + (l.half ? " · half day" : "") + (l.notes ? " · " + esc(l.notes) : "") + "</div>" +
+        '<div class="lact"><select class="statusSel" aria-label="Status" data-status="' + l.id + '" style="' + chipStyle(l.status) + '">' + opts(STATUSES, l.status) + "</select>" +
+        '<button class="btn ghost" data-act="del" data-id="' + l.id + '">Delete</button></div></div></div>';
+    }).join("");
+
+    return '<div class="card"><h2>Add leave</h2>' +
+      '<div class="row"><div><label for="f-start">First day</label><input id="f-start" type="date" data-form="start" value="' + form.start + '"></div>' +
+      '<div><label for="f-end">Last day</label><input id="f-end" type="date" data-form="end" value="' + form.end + '"></div></div>' +
+      '<div class="row"><div><label for="f-type">Type</label><select id="f-type" data-form="type">' + opts(TYPES, form.type) + "</select></div>" +
+      '<div><label for="f-status">Status</label><select id="f-status" data-form="status">' + opts(STATUSES, form.status) + "</select></div></div>" +
+      '<div style="margin-bottom:12px"><label for="f-notes">Notes (optional)</label><input id="f-notes" type="text" data-form="notes" value="' + esc(form.notes) + '"></div>' +
+      '<label class="check"><input type="checkbox" data-form="half"' + (form.half ? " checked" : "") + "> Half day (single day only)</label>" +
+      '<div class="preview" id="preview"></div>' +
+      '<div class="err" id="err" role="alert">' + esc(error) + "</div>" +
+      '<button class="btn" data-act="add">Add leave</button></div>' +
+      '<div class="card"><h2>All leave</h2>' + list + "</div>";
+  }
+
+  function settingsView() {
+    var s = data.settings;
+    var hols = data.holidays.length === 0 ? '<div class="empty">No holidays added.</div>' : data.holidays.map(function (h) {
+      return '<div class="stat"><span>' + fmt(h.date, true) + " · " + esc(h.name) + '</span><button class="btn ghost" data-act="delhol" data-date="' + h.date + '">Remove</button></div>';
+    }).join("");
+    return '<div class="card"><h2>Your leave year</h2>' +
+      '<div style="margin-bottom:12px"><label for="s-name">Name</label><input id="s-name" type="text" data-set="name" value="' + esc(s.name) + '"></div>' +
+      '<div class="row"><div><label for="s-year">Leave year</label><input id="s-year" type="number" inputmode="numeric" data-set="year" value="' + esc(s.year) + '"></div>' +
+      '<div><label for="s-ent">Entitlement (days)</label><input id="s-ent" type="number" inputmode="decimal" step="0.5" data-set="entitlement" value="' + esc(s.entitlement) + '"></div></div>' +
+      '<div style="margin-bottom:12px"><label for="s-tk">Leave already taken this year (days)</label><input id="s-tk" type="number" inputmode="decimal" step="0.5" data-set="taken" value="' + esc(s.taken) + '"><div class="sub">Days off before you started using this tracker, not counting bank holidays.</div></div>' +
+      '<div class="row"><div><label for="s-car">Carried over (days)</label><input id="s-car" type="number" inputmode="decimal" step="0.5" data-set="carry" value="' + esc(s.carry) + '"></div>' +
+      '<div><label for="s-hrs">Hours per day</label><input id="s-hrs" type="number" inputmode="decimal" step="0.5" data-set="hours" value="' + esc(s.hours) + '"></div></div>' +
+      '<label class="check"><input type="checkbox" data-set="includesBH"' + (s.includesBH ? " checked" : "") + '> My entitlement includes bank holidays</label>' +
+      '<div class="sub">When this is on, each weekday bank holiday in the year comes off your allowance automatically, so you only log the extra days you book.</div>' +
+      '<label class="check" style="margin-top:12px"><input type="checkbox" data-set="showMoon"' + (s.showMoon !== false ? " checked" : "") + '> Show full moon days on the calendar</label>' +
+      '<div class="sub">A small \ud83c\udf15 marks the day the moon turns full. Dates are approximate, within about a day.</div></div>' +
+      '<div class="card"><h2>Bank holidays</h2><div class="sub" style="margin-bottom:12px">England &amp; Wales holidays for 2026–27 are pre-loaded. Check them against your region (Scotland and Northern Ireland differ).</div>' +
+      '<div class="row"><div><label for="h-date">Date</label><input id="h-date" type="date" value="' + hol.date + '"></div>' +
+      '<div><label for="h-name">Name</label><input id="h-name" type="text" value="' + esc(hol.name) + '"></div></div>' +
+      '<button class="btn" data-act="addhol">Add holiday</button><button class="btn soft" data-act="addew">Re-add England &amp; Wales 2026–27</button><div style="margin-top:10px">' + hols + "</div></div>" +
+      '<div class="card"><h2>Backup and move your data</h2><div class="sub" style="margin:-6px 0 12px">Your leave is stored on this device only. To move it to another phone or your computer, copy a backup code here, send it to yourself, then paste it on the other device.</div>' +
+      '<div class="twin"><button class="btn" data-act="copycode">Copy backup code</button><button class="btn soft" style="margin-top:0" data-act="savefile">Save backup file</button></div>' +
+      '<textarea class="code" id="code-in" placeholder="Paste a backup code here" aria-label="Backup code" spellcheck="false"></textarea>' +
+      '<div class="twin" style="margin-top:10px"><button class="btn" data-act="restorecode">Restore from code</button><label class="btn soft filebtn" style="margin:0;color:var(--accent)">Restore from file<input type="file" id="imp" accept=".json,application/json" hidden></label></div></div>' +
+      '<div class="card"><h2>Your data</h2><div class="sub" style="margin-bottom:12px">Everything is stored in this browser on this device. Clearing browser data will erase it.</div>' +
+      '<button class="btn danger" data-act="reset">Clear all data</button></div>';
+  }
+
+  function render() {
+    var c = computed();
+    var s = data.settings;
+    var big = tab === "overview";
+    var nav = [["overview","Overview"],["calendar","Calendar"],["log","Log leave"],["settings","Settings"]].map(function (t) {
+      return '<button class="tab" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICON[t[0]] + "<span>" + t[1] + "</span></button>";
+    }).join("");
+    var stage = "";
+    if (big) {
+      var neg = c.remaining < 0;
+      stage = '<div class="stage"><div class="heronum' + (neg ? " neg" : "") + '" data-count="' + num(c.remaining) + '" aria-label="' + num(c.remaining) + ' days left">' + num(c.remaining) + '</div>' +
+        '<div class="herolbl"><b>days left</b><span>this year</span></div>' +
+        '<div class="ifall">if pending<br>approved<b>' + num(c.remainingIfAll) + "</b></div></div>";
+    }
+    document.getElementById("app").innerHTML =
+      '<div class="top' + (big ? " big" : "") + '"><h1>' + (s.name ? esc(s.name) + "'s leave" : "Annual leave") + " " + year() + "</h1>" + stage +
+      "<p id=\"topnote\"></p></div>" +
+      '<div class="body' + (enterAnim ? " enter" : "") + '">' + (tab === "overview" ? overview(c) : tab === "calendar" ? calView(c) : tab === "log" ? logView(c) : settingsView()) + "</div>" +
+      '<div class="nav"><div class="navIn" role="tablist">' + nav + "</div></div>";
+    enterAnim = false;
+    var tn = document.getElementById("topnote");
+    if (tn) tn.textContent = (tab === "overview" && topNote) ? topNote : (s.includesBH ? "Your allowance includes bank holidays." : "Weekends and bank holidays aren't counted.");
+    if (tab === "overview" && animate) runCountUps();
+    if (tab === "overview") animate = false;
+    if (tab === "log") updatePreview();
+  }
+
+  // Count-up numbers: part of the single opening sequence (numbers, day squares and wheel arrive together).
+  function runCountUps() {
+    if (REDUCED) return;
+    var els = document.querySelectorAll("[data-count]");
+    Array.prototype.forEach.call(els, function (el) {
+      var to = parseFloat(el.getAttribute("data-count")), suffix = el.getAttribute("data-suffix") || "";
+      if (!isFinite(to) || to === 0) return;
+      var dec = String(to).indexOf(".") > -1, t0 = null;
+      el.textContent = "0" + suffix;
+      function step(ts) {
+        if (t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / 950), e = 1 - Math.pow(1 - p, 3), v = to * e;
+        el.textContent = (p < 1 ? (dec ? v.toFixed(1) : Math.round(v)) : num(to)) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  // A short confetti burst when a holiday is booked.
+  function confetti() {
+    if (REDUCED || !document.body.animate) return;
+    var colors = ["#2DD4BF", "#FFB020", "#C084FC", "#EC4899", "#7C7CF8", "#FFFFFF"];
+    var W = window.innerWidth, H = window.innerHeight;
+    var box = document.createElement("div");
+    box.setAttribute("aria-hidden", "true");
+    box.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:40;overflow:hidden";
+    document.body.appendChild(box);
+    for (var i = 0; i < 46; i++) {
+      var p = document.createElement("i"), sz = 6 + Math.random() * 7;
+      p.style.cssText = "position:absolute;left:" + (W / 2) + "px;top:" + (H * 0.6) + "px;width:" + sz + "px;height:" + (sz * (Math.random() > 0.5 ? 1 : 0.5)) + "px;border-radius:2px;background:" + colors[i % colors.length];
+      box.appendChild(p);
+      var ang = (-90 + (Math.random() - 0.5) * 120) * Math.PI / 180, v = 240 + Math.random() * 330;
+      var dx = Math.cos(ang) * v * 0.85, dy = Math.sin(ang) * v;
+      p.animate([
+        { transform:"translate(0,0) rotate(0deg)", opacity:1 },
+        { transform:"translate(" + dx + "px," + dy + "px) rotate(" + (Math.random() * 540) + "deg)", opacity:1, offset:0.42 },
+        { transform:"translate(" + (dx * 1.3) + "px," + (dy + H * 0.75) + "px) rotate(" + (Math.random() * 900) + "deg)", opacity:0 }
+      ], { duration:1500 + Math.random() * 600, easing:"cubic-bezier(.2,.6,.4,1)", fill:"forwards" });
+    }
+    setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 2300);
+  }
+
+  function updatePreview() {
+    var p = document.getElementById("preview");
+    if (!p) return;
+    if (form.start && (form.end || form.start) >= form.start) {
+      p.textContent = "This will use " + num(workingDays(form.start, form.end || form.start, holidaySet(), form.half)) + " working day(s).";
+    } else p.textContent = "";
+  }
+
+  function toast(msg, ms) {
+    Array.prototype.forEach.call(document.querySelectorAll(".toast"), function (o) { if (o.parentNode) o.parentNode.removeChild(o); });
+    var t = document.createElement("div");
+    t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 1800);
+  }
+
+  // ---- events ----
+  var app = document.getElementById("app");
+
+  app.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-tab],[data-act]");
+    if (!t) return;
+    if (t.dataset.tab) { if (tab !== t.dataset.tab) enterAnim = true; tab = t.dataset.tab; render(); window.scrollTo(0, 0); return; }
+    var act = t.dataset.act;
+    if (act === "bhinfo") { toast(t.dataset.info, 3200); return; }
+    if (act === "calprev" || act === "calnext") {
+      var step = act === "calprev" ? -1 : 1, nd = new Date(cal.y, cal.m + step, 1);
+      cal.y = nd.getFullYear(); cal.m = nd.getMonth(); render(); return;
+    }
+    if (act === "caltoday") { cal = { y:null, m:null }; render(); return; }
+    if (act === "tip") {
+      form.start = t.dataset.start; form.end = t.dataset.end; form.type = "Annual Leave"; form.half = false; form.status = "Pending"; error = "";
+      tab = "log"; enterAnim = true; render(); window.scrollTo(0, 0); return;
+    }
+    if (act === "copycode") { copyCode(); return; }
+    if (act === "savefile") { saveFile(); return; }
+    if (act === "restorecode") { var ci = document.getElementById("code-in"); restoreFrom(ci ? ci.value : ""); return; }
+    if (act === "add") {
+      if (!form.start) { error = "Choose a start date."; return render(); }
+      var end = form.end || form.start;
+      if (end < form.start) { error = "The end date is before the start date."; return render(); }
+      if (workingDays(form.start, end, holidaySet(), form.half) === 0) { error = "That range has no working days (weekends and bank holidays are skipped)."; return render(); }
+      var celebrate = form.type === "Annual Leave";
+      data.leaves.push({ id:Date.now() + Math.random(), start:form.start, end:end, type:form.type, half:form.half, status:form.status, notes:form.notes });
+      data.leaves.sort(function (a, b) { return a.start.localeCompare(b.start); });
+      form = { start:"", end:"", type:"Annual Leave", half:false, status:"Pending", notes:"" };
+      error = ""; save(); render(); toast("Leave added"); if (celebrate) confetti();
+    } else if (act === "del") {
+      data.leaves = data.leaves.filter(function (l) { return String(l.id) !== t.dataset.id; });
+      save(); render();
+    } else if (act === "addhol") {
+      var d = document.getElementById("h-date").value, n = document.getElementById("h-name").value;
+      if (!d || data.holidays.some(function (h) { return h.date === d; })) return;
+      data.holidays.push({ date:d, name:n || "Bank holiday" });
+      data.holidays.sort(function (a, b) { return a.date.localeCompare(b.date); });
+      hol = { date:"", name:"" }; save(); render();
+    } else if (act === "addew") {
+      ewList().forEach(function (h) { if (!data.holidays.some(function (x) { return x.date === h.date; })) data.holidays.push(h); });
+      data.holidays.sort(function (a, b) { return a.date.localeCompare(b.date); });
+      save(); render(); toast("Holidays added");
+    } else if (act === "delhol") {
+      data.holidays = data.holidays.filter(function (h) { return h.date !== t.dataset.date; });
+      save(); render();
+    } else if (act === "reset") {
+      if (window.confirm("Delete all leave, holidays and settings?")) { data = defaults(); save(); render(); }
+    }
+  });
+
+  function onFormInput(e) {
+    var el = e.target, k = el.dataset.form;
+    if (!k) return;
+    form[k] = el.type === "checkbox" ? el.checked : el.value;
+    if (k === "start") {
+      if (!form.end || form.end < form.start) { form.end = form.start; document.getElementById("f-end").value = form.end; }
+    }
+    if (error) { error = ""; var er = document.getElementById("err"); if (er) er.textContent = ""; }
+    updatePreview();
+  }
+  app.addEventListener("input", onFormInput);
+  app.addEventListener("change", function (e) {
+    var el = e.target;
+    if (el.dataset.form) return onFormInput(e);
+    if (el.dataset.set) {
+      var k = el.dataset.set;
+      data.settings[k] = el.type === "checkbox" ? el.checked : el.type === "number" ? (el.value === "" ? 0 : Number(el.value)) : el.value;
+      save(); render();
+    } else if (el.dataset.status) {
+      data.leaves.forEach(function (l) { if (String(l.id) === el.dataset.status) l.status = el.value; });
+      save(); render();
+    } else if (el.id === "imp") {
+      var f = el.files && el.files[0];
+      if (f) { var fr = new FileReader(); fr.onload = function () { restoreFrom(fr.result); }; fr.readAsText(f); }
+      el.value = "";
+    } else if (el.id === "h-date") hol.date = el.value;
+    else if (el.id === "h-name") hol.name = el.value;
+  });
+
+  render();
+
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  }
 })();
 </script>
-<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
 </body>
 </html>
