@@ -289,6 +289,22 @@
     try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
   }
 
+  // ---- Fit to screen: phones set to "desktop site" shrink the app into a narrow column; this scales it back up ----
+  var FIT_KEY = "annual-leave-fit";
+  var FIT_OPTS = [["auto","Automatic (recommended)"],["1","Normal"],["1.3","Larger"],["1.6","Large"],["2","Extra large"],["2.5","Maximum"]];
+  function getFit() { try { return localStorage.getItem(FIT_KEY) || "auto"; } catch (e) { return "auto"; } }
+  function applyFit() {
+    var mode = getFit(), z = 1;
+    if (mode === "auto") {
+      var sw = window.screen && window.screen.width, iw = window.innerWidth;
+      if (sw && sw < 700 && iw > sw * 1.25) z = iw / sw;
+    } else { z = parseFloat(mode) || 1; }
+    z = Math.max(1, Math.min(3, z));
+    document.documentElement.style.zoom = z > 1.01 ? String(z) : "";
+  }
+  window.addEventListener("resize", applyFit);
+  applyFit();
+
   var data = load();
   var tab = "overview";
   var form = { start:"", end:"", type:"Annual Leave", half:false, status:"Pending", notes:"" };
@@ -767,6 +783,8 @@
       '<div class="row"><div><label for="h-date">Date</label><input id="h-date" type="date" value="' + hol.date + '"></div>' +
       '<div><label for="h-name">Name</label><input id="h-name" type="text" value="' + esc(hol.name) + '"></div></div>' +
       '<button class="btn" data-act="addhol">Add holiday</button><button class="btn soft" data-act="addew">Re-add England &amp; Wales 2026–27</button><div style="margin-top:10px">' + hols + "</div></div>" +
+      '<div class="card"><h2>Screen size</h2><div class="sub" style="margin:-6px 0 12px">If the app looks small or has empty margins at the sides, choose a bigger size.</div>' +
+      '<select id="fit-sel" aria-label="Screen size">' + FIT_OPTS.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === getFit() ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select></div>" +
       '<div class="card"><h2>Backup and move your data</h2><div class="sub" style="margin:-6px 0 12px">Your leave is stored on this device only. To move it to another phone or your computer, copy a backup code here, send it to yourself, then paste it on the other device.</div>' +
       '<div class="twin"><button class="btn" data-act="copycode">Copy backup code</button><button class="btn soft" style="margin-top:0" data-act="savefile">Save backup file</button></div>' +
       '<textarea class="code" id="code-in" placeholder="Paste a backup code here" aria-label="Backup code" spellcheck="false"></textarea>' +
@@ -938,6 +956,9 @@
       var f = el.files && el.files[0];
       if (f) { var fr = new FileReader(); fr.onload = function () { restoreFrom(fr.result); }; fr.readAsText(f); }
       el.value = "";
+    } else if (el.id === "fit-sel") {
+      try { localStorage.setItem(FIT_KEY, el.value); } catch (e) {}
+      applyFit(); render();
     } else if (el.id === "h-date") hol.date = el.value;
     else if (el.id === "h-name") hol.name = el.value;
   });
