@@ -206,6 +206,22 @@
   .chipbtn:active { transform:scale(.97); }
 
   /* calendar */
+  .bhsum { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:-4px 0 6px; }
+  .bhsum .sub { margin:0; }
+  .bhgrp { font-size:11px; font-weight:650; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); margin:12px 0 2px; }
+  .bhgrp:first-of-type { margin-top:4px; }
+  .bhrow { display:flex; align-items:center; gap:12px; width:100%; border:0; background:transparent; font:inherit; color:var(--ink); text-align:left; padding:11px 0; border-bottom:1px solid var(--line); cursor:pointer; }
+  .bhrow:last-child { border-bottom:0; padding-bottom:2px; }
+  .bhrow.past { opacity:.5; }
+  .bhrow.next .bhd { box-shadow:0 0 0 2px var(--lav), inset 0 1px 0 rgba(255,255,255,.35); }
+  .bhd { flex:none; width:50px; height:54px; border-radius:15px; background:var(--lav); color:#3B0764; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.05; box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+  .bhd b { font-size:20px; font-weight:700; letter-spacing:-.02em; }
+  .bhd span { font-size:11px; font-weight:650; }
+  .bht { flex:1; min-width:0; }
+  .bht b { display:block; font-size:14px; font-weight:650; letter-spacing:-.01em; }
+  .bht span { display:block; font-size:12px; color:var(--mute); margin-top:2px; }
+  .bhw { flex:none; text-align:right; font-size:12px; font-weight:650; color:var(--mute); font-variant-numeric:tabular-nums; }
+  .bhw.nx { color:var(--accent); background:var(--soft2); padding:5px 10px; border-radius:20px; }
   .calhead { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
   .calhead b { font-size:17px; font-weight:650; letter-spacing:-.015em; }
   .calhead .navb { border:0; width:40px; height:40px; border-radius:14px; background:var(--soft2); color:var(--accent); font:inherit; font-size:22px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
@@ -529,6 +545,39 @@
     return a0 <= SYNODIC / 2 && a1 > SYNODIC / 2;
   }
 
+  // ---- bank holiday list for the year shown in the calendar ----
+  function bankHolidayCard(c) {
+    var y = cal.y, now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var list = data.holidays.filter(function (h) { return h.date.slice(0, 4) === String(y); })
+      .sort(function (a, b) { return a.date.localeCompare(b.date); });
+    if (!list.length) return "";
+    var weekdayCount = 0, nextIso = null;
+    list.forEach(function (h) {
+      var d = parse(h.date), wd = d.getDay();
+      if (wd !== 0 && wd !== 6) weekdayCount++;
+      if (!nextIso && d >= t0) nextIso = h.date;
+    });
+    var summary = data.settings.includesBH && y === year()
+      ? weekdayCount + " weekday bank holiday" + (weekdayCount === 1 ? "" : "s") + " are included in your " + num(c.available) + "-day allowance."
+      : weekdayCount + " weekday bank holiday" + (weekdayCount === 1 ? "" : "s") + " in " + y + ".";
+    var upRows = [], pastRows = [];
+    list.forEach(function (h) {
+      var d = parse(h.date), wd = d.getDay(), weekend = (wd === 0 || wd === 6);
+      var diff = Math.round((d - t0) / 86400000);
+      var when = diff < 0 ? "Passed" : diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : "in " + diff + " days";
+      var isNext = h.date === nextIso;
+      var dayName = d.toLocaleDateString("en-GB", { weekday:"long" });
+      var row = '<button class="bhrow' + (diff < 0 ? " past" : "") + (isNext ? " next" : "") + '" data-act="calgo" data-y="' + d.getFullYear() + '" data-m="' + d.getMonth() + '">' +
+        '<div class="bhd"><b>' + d.getDate() + "</b><span>" + mon(h.date) + "</span></div>" +
+        '<div class="bht"><b>' + esc(h.name) + "</b><span>" + dayName + (weekend ? " · weekend, not counted" : "") + "</span></div>" +
+        '<div class="bhw' + (isNext ? " nx" : "") + '">' + (isNext ? "Next · " : "") + when + "</div></button>";
+      (diff < 0 ? pastRows : upRows).push(row);
+    });
+    var rows = (upRows.length && pastRows.length ? '<div class="bhgrp">Coming up</div>' : "") + upRows.join("") +
+      (pastRows.length && upRows.length ? '<div class="bhgrp">Earlier this year</div>' : "") + pastRows.join("");
+    return '<div class="card"><h2>Bank holidays ' + y + '</h2><div class="bhsum"><div class="sub">' + summary + "</div></div>" + rows + "</div>";
+  }
+
   function calView(c) {
     var now = new Date();
     if (cal.y === null) {
@@ -579,7 +628,8 @@
       '<button class="navb" data-act="calnext" aria-label="Next month">›</button></div>' +
       '<div class="cal">' + cells + "</div>" +
       '<div class="legend"><span class="lg"><i style="background:var(--lav)"></i>Bank holiday</span><span class="lg"><i style="background:var(--indigo)"></i>Approved</span><span class="lg"><i style="background:var(--amber)"></i>Pending</span><span class="lg"><i style="background:var(--rose)"></i>Sick / other</span>' + (data.settings.showMoon !== false ? '<span class="lg">\ud83c\udf15 Full moon</span>' : "") + "</div></div>" +
-      '<div class="card"><h2>This month</h2>' + (list ? '<div class="blks" style="margin-top:0">' + list + "</div>" : '<div class="empty">Nothing booked this month.</div>') + "</div>";
+      '<div class="card"><h2>This month</h2>' + (list ? '<div class="blks" style="margin-top:0">' + list + "</div>" : '<div class="empty">Nothing booked this month.</div>') + "</div>" +
+      bankHolidayCard(c);
   }
 
   // ---- backup: move data between phone and computer ----
@@ -892,6 +942,7 @@
       var step = act === "calprev" ? -1 : 1, nd = new Date(cal.y, cal.m + step, 1);
       cal.y = nd.getFullYear(); cal.m = nd.getMonth(); render(); return;
     }
+    if (act === "calgo") { cal.y = parseInt(t.dataset.y, 10); cal.m = parseInt(t.dataset.m, 10); render(); window.scrollTo(0, 0); return; }
     if (act === "caltoday") { cal = { y:null, m:null }; render(); return; }
     if (act === "tip") {
       form.start = t.dataset.start; form.end = t.dataset.end; form.type = "Annual Leave"; form.half = false; form.status = "Pending"; error = "";
