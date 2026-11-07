@@ -27,6 +27,7 @@
     --warn-bg:#FFF1F2; --warn-fg:#BE123C; --prev-bg:#ECFDF9; --prev-fg:#0B7A6D; --err:#BE123C;
     --next1:#FFF7E0; --next2:#FFE9F1; --toast-bg:rgba(27,26,63,.88); --toast-fg:#fff;
     --glass:rgba(255,255,255,.74);
+    --fsys:"Inter","SF Pro Display","Segoe UI Variable Display","Segoe UI",Roboto,system-ui,-apple-system,sans-serif;
     --shadow:0 1px 2px rgba(27,26,63,.04), 0 12px 28px -14px rgba(67,56,202,.22);
   }
   @media (prefers-color-scheme: dark) {
@@ -46,7 +47,22 @@
   }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { margin:0; background:var(--bg); }
-  body { font-family:"Inter","SF Pro Display","Segoe UI Variable Display","Segoe UI",Roboto,system-ui,-apple-system,sans-serif; color:var(--ink); letter-spacing:-.006em; -webkit-font-smoothing:antialiased; }
+  body { font-family:var(--fb,"Inter","SF Pro Display","Segoe UI Variable Display","Segoe UI",Roboto,system-ui,-apple-system,sans-serif); color:var(--ink); letter-spacing:-.006em; -webkit-font-smoothing:antialiased; }
+  /* chosen font applies to headings and big numbers; to everything if "Everything" is picked */
+  .top h1, .heronum, .herolbl b, .ifall b, .card h2, .cd b, .calhead b, .dbadge b, .tipn b, .tile b, .nudge b, .moonrow .mt b, .ltitle, .bht b, .tipt b, .bhd b { font-family:var(--fh,inherit); }
+  html.cf { font-synthesis:none; }
+  html.cf .top h1, html.cf .heronum, html.cf .herolbl b, html.cf .ifall b, html.cf .card h2, html.cf .cd b, html.cf .calhead b, html.cf .dbadge b, html.cf .tipn b, html.cf .tile b, html.cf .nudge b, html.cf .moonrow .mt b, html.cf .ltitle, html.cf .bht b, html.cf .tipt b, html.cf .bhd b { letter-spacing:0; }
+  .fcur { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .fcur .nm { font-size:24px; line-height:1.15; min-width:0; }
+  .fcur .nm small { display:block; font-family:var(--fsys); font-size:12px; font-weight:600; color:var(--mute); margin-top:3px; }
+  .fgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+  .ftile { border:1px solid var(--line); background:var(--soft); color:var(--ink); border-radius:16px; padding:10px 8px; min-height:72px; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  .ftile .fn { font-size:22px; line-height:1.15; }
+  .ftile small { font-family:var(--fsys); font-size:11px; font-weight:600; color:var(--mute); }
+  .ftile.on { outline:3px solid var(--violet); outline-offset:2px; background:var(--soft2); }
+  .fseg { display:grid; grid-template-columns:1fr 1fr; gap:6px; background:var(--soft); padding:4px; border-radius:14px; margin-top:12px; }
+  .fseg button { border:0; background:transparent; padding:10px 6px; border-radius:11px; font:inherit; font-family:var(--fsys); font-size:13px; font-weight:600; color:var(--mute); cursor:pointer; }
+  .fseg button[aria-pressed="true"] { background:var(--card); color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,.14); }
   #app { max-width:560px; margin:0 auto; min-height:100vh; padding-bottom:calc(104px + env(safe-area-inset-bottom)); }
 
   /* header: layered gradient, square-grid pattern echoing the day squares */
@@ -393,6 +409,62 @@
     fr.readAsDataURL(file);
   }
   applyTheme();
+
+  // ---- Font style: choose a font for headings or the whole app (loaded from Google Fonts when picked) ----
+  var FONT_KEY = "annual-leave-font";
+  var FONTS = [
+    { id:"default", name:"Clean (default)", cat:"Standard" },
+    { id:"pacifico", name:"Pacifico", fam:"Pacifico", spec:"Pacifico", fb:"cursive", cat:"Retro script" },
+    { id:"dancing", name:"Dancing Script", fam:"Dancing Script", spec:"Dancing+Script:wght@400..700", fb:"cursive", cat:"Script" },
+    { id:"vibes", name:"Great Vibes", fam:"Great Vibes", spec:"Great+Vibes", fb:"cursive", cat:"Calligraphy" },
+    { id:"satisfy", name:"Satisfy", fam:"Satisfy", spec:"Satisfy", fb:"cursive", cat:"Script" },
+    { id:"caveat", name:"Caveat", fam:"Caveat", spec:"Caveat:wght@400..700", fb:"cursive", cat:"Handwriting" },
+    { id:"kaushan", name:"Kaushan Script", fam:"Kaushan Script", spec:"Kaushan+Script", fb:"cursive", cat:"Brush" },
+    { id:"lobster", name:"Lobster", fam:"Lobster", spec:"Lobster", fb:"cursive", cat:"Retro" },
+    { id:"shrikhand", name:"Shrikhand", fam:"Shrikhand", spec:"Shrikhand", fb:"serif", cat:"Retro bold" },
+    { id:"righteous", name:"Righteous", fam:"Righteous", spec:"Righteous", fb:"sans-serif", cat:"Retro" },
+    { id:"chewy", name:"Chewy", fam:"Chewy", spec:"Chewy", fb:"cursive", cat:"Bubble" },
+    { id:"fredoka", name:"Fredoka", fam:"Fredoka", spec:"Fredoka:wght@400..700", fb:"sans-serif", cat:"Rounded" },
+    { id:"pirata", name:"Pirata One", fam:"Pirata One", spec:"Pirata+One", fb:"serif", cat:"Gothic" },
+    { id:"fraktur", name:"UnifrakturCook", fam:"UnifrakturCook", spec:"UnifrakturCook:wght@700", fb:"serif", cat:"Old English" },
+    { id:"playfair", name:"Playfair Display", fam:"Playfair Display", spec:"Playfair+Display:wght@400..800", fb:"serif", cat:"Elegant" },
+    { id:"cinzel", name:"Cinzel", fam:"Cinzel", spec:"Cinzel:wght@400..800", fb:"serif", cat:"Classic" },
+    { id:"abril", name:"Abril Fatface", fam:"Abril Fatface", spec:"Abril+Fatface", fb:"serif", cat:"Bold elegant" },
+    { id:"cormorant", name:"Cormorant Garamond", fam:"Cormorant Garamond", spec:"Cormorant+Garamond:wght@400;500;600;700", fb:"serif", cat:"Refined" },
+    { id:"elite", name:"Special Elite", fam:"Special Elite", spec:"Special+Elite", fb:"monospace", cat:"Typewriter" },
+    { id:"courier", name:"Courier Prime", fam:"Courier Prime", spec:"Courier+Prime:wght@400;700", fb:"monospace", cat:"Typewriter" }
+  ];
+  var fontLinks = {}, fontsOpen = false;
+  function getFont() {
+    var f = { id:"default", scope:"head" };
+    try { var raw = localStorage.getItem(FONT_KEY); if (raw) f = Object.assign(f, JSON.parse(raw)); } catch (e) {}
+    return f;
+  }
+  function saveFont(f) { try { localStorage.setItem(FONT_KEY, JSON.stringify(f)); } catch (e) {} }
+  function fontById(id) { return FONTS.filter(function (x) { return x.id === id; })[0] || FONTS[0]; }
+  function fontStack(f) { return f.fam ? "'" + f.fam + "', " + f.fb : ""; }
+  function loadFont(f) {
+    if (!f.spec || fontLinks[f.id]) return;
+    var l = document.createElement("link");
+    l.rel = "stylesheet"; fontLinks[f.id] = l;
+    l.href = "https://fonts.googleapis.com/css2?family=" + f.spec + "&display=swap";
+    l.onerror = function () {
+      if (l.getAttribute("data-retry")) return;
+      l.setAttribute("data-retry", "1");
+      l.href = "https://fonts.googleapis.com/css2?family=" + f.fam.replace(/ /g, "+") + "&display=swap";
+    };
+    document.head.appendChild(l);
+  }
+  function applyFont() {
+    var st = getFont(), f = fontById(st.id), root = document.documentElement;
+    if (!f.fam) { root.style.removeProperty("--fh"); root.style.removeProperty("--fb"); root.classList.remove("cf"); return; }
+    loadFont(f);
+    var stack = fontStack(f) + ", sans-serif";
+    root.style.setProperty("--fh", stack);
+    if (st.scope === "all") root.style.setProperty("--fb", stack); else root.style.removeProperty("--fb");
+    root.classList.add("cf");
+  }
+  applyFont();
 
   var data = load();
   var tab = "overview";
@@ -886,6 +958,21 @@
       '<div class="card"><h2>All leave</h2>' + list + "</div>";
   }
 
+  function fontCard() {
+    var st = getFont(), cur = fontById(st.id);
+    var curStyle = cur.fam ? ' style="font-family:' + fontStack(cur) + '"' : "";
+    var h = '<div class="card"><h2>Font style</h2><div class="sub" style="margin:-6px 0 12px">Choose a font for the app. New fonts need internet the first time you pick them.</div>' +
+      '<div class="fcur"><div class="nm"><span' + curStyle + ">" + esc(cur.name) + "</span><small>" + cur.cat + '</small></div><button class="chipbtn" data-act="' + (fontsOpen ? "fontclose" : "fontopen") + '">' + (fontsOpen ? "Close" : "Browse") + "</button></div>" +
+      '<div class="fseg" role="group" aria-label="Where to use the font"><button data-act="fontscope" data-scope="head" aria-pressed="' + (st.scope !== "all") + '">Headings and numbers</button><button data-act="fontscope" data-scope="all" aria-pressed="' + (st.scope === "all") + '">Everything</button></div>';
+    if (fontsOpen) {
+      h += '<div class="fgrid">' + FONTS.map(function (f) {
+        var on = f.id === st.id;
+        return '<button class="ftile' + (on ? " on" : "") + '" data-act="fontpick" data-id="' + f.id + '" aria-pressed="' + on + '"><span class="fn"' + (f.fam ? ' style="font-family:' + fontStack(f) + '"' : "") + ">" + esc(f.name) + "</span><small>" + f.cat + "</small></button>";
+      }).join("") + "</div>";
+    }
+    return h + "</div>";
+  }
+
   function settingsView() {
     var s = data.settings;
     var hols = data.holidays.length === 0 ? '<div class="empty">No holidays added.</div>' : data.holidays.map(function (h) {
@@ -914,6 +1001,7 @@
       }).join("") + "</div>" +
       '<label class="btn filebtn" style="margin-bottom:0">Choose a photo from gallery<input type="file" id="bg-file" accept="image/*" hidden></label>' +
       (hasPhoto() ? '<label for="bg-dim" style="margin-top:14px">Darken picture so text is easy to read: <b id="bg-dim-val">' + getTheme().dim + '%</b></label><input class="range" type="range" id="bg-dim" min="0" max="80" step="5" value="' + getTheme().dim + '"><button class="btn soft" data-act="bgclear">Remove photo</button>' : "") + "</div>" +
+      fontCard() +
       '<div class="card"><h2>Screen size</h2><div class="sub" style="margin:-6px 0 12px">If the app looks small or has empty margins at the sides, choose a bigger size.</div>' +
       '<select id="fit-sel" aria-label="Screen size">' + FIT_OPTS.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === getFit() ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select></div>" +
       '<div class="card"><h2>Backup and move your data</h2><div class="sub" style="margin:-6px 0 12px">Your leave is stored on this device only. To move it to another phone or your computer, copy a backup code here, send it to yourself, then paste it on the other device.</div>' +
@@ -1040,6 +1128,12 @@
       var th = getTheme(); th.preset = t.dataset.id; saveTheme(th); applyTheme(); render(); return;
     }
     if (act === "bgclear") { try { localStorage.removeItem(PHOTO_KEY); } catch (e) {} applyTheme(); render(); toast("Photo removed"); return; }
+    if (act === "fontopen") { fontsOpen = true; FONTS.forEach(loadFont); render(); return; }
+    if (act === "fontclose") { fontsOpen = false; render(); return; }
+    if (act === "fontpick") {
+      var st = getFont(); st.id = t.dataset.id; saveFont(st); applyFont(); render(); toast(fontById(st.id).name); return;
+    }
+    if (act === "fontscope") { var st2 = getFont(); st2.scope = t.dataset.scope; saveFont(st2); applyFont(); render(); return; }
     if (act === "copycode") { copyCode(); return; }
     if (act === "savefile") { saveFile(); return; }
     if (act === "restorecode") { var ci = document.getElementById("code-in"); restoreFrom(ci ? ci.value : ""); return; }
