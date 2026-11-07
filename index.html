@@ -55,6 +55,19 @@
       radial-gradient(90% 75% at 100% 0%, rgba(236,72,153,.62) 0%, rgba(236,72,153,0) 60%),
       radial-gradient(70% 60% at 0% 100%, rgba(45,212,191,.30) 0%, rgba(45,212,191,0) 62%),
       linear-gradient(165deg,#2B2290 0%,#4A2BD1 48%,#7C3AED 100%); }
+  .top > .editbg { position:absolute; z-index:2; top:calc(14px + env(safe-area-inset-top)); right:14px; width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.16); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); color:#fff; display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer; }
+  .editbg:active { transform:scale(.94); }
+  .editbg svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  .top h1 { padding-right:50px; }
+  #bg-card { scroll-margin-top:16px; }
+  .top.photo::before { display:none; }
+  .top.photo h1, .top.photo .heronum, .top.photo .herolbl, .top.photo .ifall, .top.photo p { text-shadow:0 2px 14px rgba(0,0,0,.5); }
+  .hpreview { height:84px; border-radius:18px; margin-bottom:14px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.12); }
+  .swatches { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .sw { border:0; padding:0; border-radius:14px; height:54px; cursor:pointer; position:relative; color:#fff; font:inherit; font-size:12px; font-weight:650; display:flex; align-items:flex-end; justify-content:flex-start; box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
+  .sw span { padding:0 0 6px 9px; text-shadow:0 1px 6px rgba(0,0,0,.5); }
+  .sw.on { outline:3px solid var(--violet); outline-offset:2px; }
+  .range { width:100%; accent-color:var(--violet); margin:6px 0 4px; }
   .top::before { content:""; position:absolute; inset:0; pointer-events:none;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='8' y='8' width='14' height='14' rx='4.5' fill='white' fill-opacity='.075'/%3E%3C/svg%3E");
     background-size:30px 30px;
@@ -320,6 +333,66 @@
   }
   window.addEventListener("resize", applyFit);
   applyFit();
+
+  // ---- Header background: preset colours or your own photo (stored on this device only) ----
+  var THEME_KEY = "annual-leave-theme", PHOTO_KEY = "annual-leave-photo";
+  var GLOW = "radial-gradient(90% 75% at 100% 0%, rgba(236,72,153,.5) 0%, rgba(236,72,153,0) 60%), radial-gradient(70% 60% at 0% 100%, rgba(45,212,191,.26) 0%, rgba(45,212,191,0) 62%), ";
+  var PRESETS = [
+    { id:"indigo",   name:"Indigo",   mid:"#4A2BD1", css:"linear-gradient(165deg,#2B2290 0%,#4A2BD1 48%,#7C3AED 100%)" },
+    { id:"ocean",    name:"Ocean",    mid:"#0B5FB0", css:"linear-gradient(165deg,#0A2A6B 0%,#0B5FB0 52%,#0E8FB8 100%)" },
+    { id:"sunset",   name:"Sunset",   mid:"#B0245F", css:"linear-gradient(165deg,#4C1D95 0%,#B0245F 55%,#B45309 100%)" },
+    { id:"forest",   name:"Forest",   mid:"#0F6B5A", css:"linear-gradient(165deg,#053B2F 0%,#0F6B5A 55%,#3F7F10 100%)" },
+    { id:"rose",     name:"Rose",     mid:"#BE123C", css:"linear-gradient(165deg,#831843 0%,#BE123C 55%,#C2410C 100%)" },
+    { id:"midnight", name:"Midnight", mid:"#1E1B4B", css:"linear-gradient(165deg,#0B1020 0%,#1E1B4B 55%,#4C1D95 100%)" }
+  ];
+  function getTheme() {
+    var t = { preset:"indigo", dim:35 };
+    try { var raw = localStorage.getItem(THEME_KEY); if (raw) t = Object.assign(t, JSON.parse(raw)); } catch (e) {}
+    return t;
+  }
+  function getPhoto() { try { return localStorage.getItem(PHOTO_KEY) || ""; } catch (e) { return ""; } }
+  function hasPhoto() { return !!getPhoto(); }
+  function headerCss() {
+    var photo = getPhoto(), t = getTheme();
+    if (photo) {
+      var d = Math.max(0, Math.min(80, Number(t.dim))) / 100;
+      return "linear-gradient(180deg, rgba(10,8,40," + d + ") 0%, rgba(10,8,40," + Math.min(0.92, d + 0.22) + ") 100%), url(" + photo + ") center / cover no-repeat";
+    }
+    var p = PRESETS.filter(function (x) { return x.id === t.preset; })[0] || PRESETS[0];
+    return p.id === "indigo" ? "" : GLOW + p.css;
+  }
+  function applyTheme() {
+    var css = headerCss(), el = document.getElementById("hero-style");
+    if (!el) { el = document.createElement("style"); el.id = "hero-style"; document.head.appendChild(el); }
+    el.textContent = css ? ".top { background:" + css + "; }" : "";
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      var p = PRESETS.filter(function (x) { return x.id === getTheme().preset; })[0] || PRESETS[0];
+      meta.setAttribute("content", hasPhoto() ? "#14122E" : p.mid);
+    }
+  }
+  function saveTheme(t) { try { localStorage.setItem(THEME_KEY, JSON.stringify(t)); } catch (e) {} }
+  function usePhotoFile(file) {
+    var fr = new FileReader();
+    fr.onerror = function () { toast("That picture couldn't be opened."); };
+    fr.onload = function () {
+      var img = new Image();
+      img.onerror = function () { toast("That picture couldn't be opened."); };
+      img.onload = function () {
+        var max = 1100, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
+        var cv = document.createElement("canvas");
+        cv.width = Math.max(1, Math.round(w * k)); cv.height = Math.max(1, Math.round(h * k));
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        var url = cv.toDataURL("image/jpeg", 0.82);
+        try { localStorage.setItem(PHOTO_KEY, url); }
+        catch (e) { toast("That picture is too large to save. Try a smaller one."); return; }
+        applyTheme(); render(); toast("Background updated");
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+  applyTheme();
 
   var data = load();
   var tab = "overview";
@@ -833,6 +906,14 @@
       '<div class="row"><div><label for="h-date">Date</label><input id="h-date" type="date" value="' + hol.date + '"></div>' +
       '<div><label for="h-name">Name</label><input id="h-name" type="text" value="' + esc(hol.name) + '"></div></div>' +
       '<button class="btn" data-act="addhol">Add holiday</button><button class="btn soft" data-act="addew">Re-add England &amp; Wales 2026–27</button><div style="margin-top:10px">' + hols + "</div></div>" +
+      '<div class="card" id="bg-card"><h2>Header background</h2><div class="sub" style="margin:-6px 0 12px">Pick a colour style or use a picture from your gallery. It is saved on this phone only.</div>' +
+      '<div class="hpreview" style="background:' + (headerCss() || (GLOW + PRESETS[0].css)) + '"></div>' +
+      '<div class="swatches">' + PRESETS.map(function (p) {
+        var on = !hasPhoto() && getTheme().preset === p.id;
+        return '<button class="sw' + (on ? " on" : "") + '" data-act="bgpreset" data-id="' + p.id + '" aria-label="' + p.name + ' colours" aria-pressed="' + on + '" style="background:' + GLOW + p.css + '"><span>' + p.name + "</span></button>";
+      }).join("") + "</div>" +
+      '<label class="btn filebtn" style="margin-bottom:0">Choose a photo from gallery<input type="file" id="bg-file" accept="image/*" hidden></label>' +
+      (hasPhoto() ? '<label for="bg-dim" style="margin-top:14px">Darken picture so text is easy to read: <b id="bg-dim-val">' + getTheme().dim + '%</b></label><input class="range" type="range" id="bg-dim" min="0" max="80" step="5" value="' + getTheme().dim + '"><button class="btn soft" data-act="bgclear">Remove photo</button>' : "") + "</div>" +
       '<div class="card"><h2>Screen size</h2><div class="sub" style="margin:-6px 0 12px">If the app looks small or has empty margins at the sides, choose a bigger size.</div>' +
       '<select id="fit-sel" aria-label="Screen size">' + FIT_OPTS.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === getFit() ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select></div>" +
       '<div class="card"><h2>Backup and move your data</h2><div class="sub" style="margin:-6px 0 12px">Your leave is stored on this device only. To move it to another phone or your computer, copy a backup code here, send it to yourself, then paste it on the other device.</div>' +
@@ -858,7 +939,7 @@
         '<div class="ifall">if pending<br>approved<b>' + num(c.remainingIfAll) + "</b></div></div>";
     }
     document.getElementById("app").innerHTML =
-      '<div class="top' + (big ? " big" : "") + '"><h1>' + (s.name ? esc(s.name) + "'s leave" : "Annual leave") + " " + year() + "</h1>" + stage +
+      '<div class="top' + (big ? " big" : "") + (hasPhoto() ? " photo" : "") + '"><button class="editbg" data-act="bgedit" aria-label="Change header background"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.7"/><path d="M4 17l5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button><h1>' + (s.name ? esc(s.name) + "'s leave" : "Annual leave") + " " + year() + "</h1>" + stage +
       "<p id=\"topnote\"></p></div>" +
       '<div class="body' + (enterAnim ? " enter" : "") + '">' + (tab === "overview" ? overview(c) : tab === "calendar" ? calView(c) : tab === "log" ? logView(c) : settingsView()) + "</div>" +
       '<div class="nav"><div class="navIn" role="tablist">' + nav + "</div></div>";
@@ -948,6 +1029,17 @@
       form.start = t.dataset.start; form.end = t.dataset.end; form.type = "Annual Leave"; form.half = false; form.status = "Pending"; error = "";
       tab = "log"; enterAnim = true; render(); window.scrollTo(0, 0); return;
     }
+    if (act === "bgedit") {
+      tab = "settings"; enterAnim = true; render();
+      var bc = document.getElementById("bg-card");
+      if (bc) bc.scrollIntoView({ block:"start" });
+      return;
+    }
+    if (act === "bgpreset") {
+      try { localStorage.removeItem(PHOTO_KEY); } catch (e) {}
+      var th = getTheme(); th.preset = t.dataset.id; saveTheme(th); applyTheme(); render(); return;
+    }
+    if (act === "bgclear") { try { localStorage.removeItem(PHOTO_KEY); } catch (e) {} applyTheme(); render(); toast("Photo removed"); return; }
     if (act === "copycode") { copyCode(); return; }
     if (act === "savefile") { saveFile(); return; }
     if (act === "restorecode") { var ci = document.getElementById("code-in"); restoreFrom(ci ? ci.value : ""); return; }
@@ -992,7 +1084,14 @@
     if (error) { error = ""; var er = document.getElementById("err"); if (er) er.textContent = ""; }
     updatePreview();
   }
-  app.addEventListener("input", onFormInput);
+  app.addEventListener("input", function (e) {
+    if (e.target && e.target.id === "bg-dim") {
+      var th = getTheme(); th.dim = parseInt(e.target.value, 10) || 0; saveTheme(th); applyTheme();
+      var lab = document.getElementById("bg-dim-val"); if (lab) lab.textContent = th.dim + "%";
+      return;
+    }
+    onFormInput(e);
+  });
   app.addEventListener("change", function (e) {
     var el = e.target;
     if (el.dataset.form) return onFormInput(e);
@@ -1006,6 +1105,10 @@
     } else if (el.id === "imp") {
       var f = el.files && el.files[0];
       if (f) { var fr = new FileReader(); fr.onload = function () { restoreFrom(fr.result); }; fr.readAsText(f); }
+      el.value = "";
+    } else if (el.id === "bg-file") {
+      var bf = el.files && el.files[0];
+      if (bf) usePhotoFile(bf);
       el.value = "";
     } else if (el.id === "fit-sel") {
       try { localStorage.setItem(FIT_KEY, el.value); } catch (e) {}
