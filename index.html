@@ -312,7 +312,7 @@
   ];
   function ewList() { return EW.map(function (h) { return { date:h[0], name:h[1] }; }); }
   function defaults() {
-    return { seeded:true, settings:{ name:"", year:new Date().getFullYear(), entitlement:28, includesBH:true, showMoon:true, carry:0, taken:13, hours:8 }, leaves:[], holidays:ewList() };
+    return { seeded:true, settings:{ name:"", year:new Date().getFullYear(), entitlement:28, includesBH:true, showMoon:true, country:"GB", region:"", holUpdated:"", carry:0, taken:13, hours:8 }, leaves:[], holidays:ewList() };
   }
   function load() {
     try {
@@ -784,7 +784,7 @@
     var leaves = (Array.isArray(obj.leaves) ? obj.leaves : []).filter(function (l) { return l && re.test(l.start) && re.test(l.end); }).map(function (l, i) {
       return { id:l.id || (Date.now() + i), start:l.start, end:l.end, type:TYPES.indexOf(l.type) > -1 ? l.type : "Annual Leave", half:!!l.half, status:STATUSES.indexOf(l.status) > -1 ? l.status : "Pending", notes:String(l.notes || "") };
     });
-    var holidays = (Array.isArray(obj.holidays) ? obj.holidays : []).filter(function (h) { return h && re.test(h.date); }).map(function (h) { return { date:h.date, name:String(h.name || "Bank holiday") }; });
+    var holidays = (Array.isArray(obj.holidays) ? obj.holidays : []).filter(function (h) { return h && re.test(h.date); }).map(function (h) { var o = { date:h.date, name:String(h.name || "Bank holiday") }; if (h.manual) o.manual = true; return o; });
     return { seeded:true, settings:settings, leaves:leaves, holidays:holidays };
   }
   function makeCode() { return "LEAVE1:" + btoa(unescape(encodeURIComponent(JSON.stringify(data)))); }
@@ -958,6 +958,91 @@
       '<div class="card"><h2>All leave</h2>' + list + "</div>";
   }
 
+  // ---- Country and public holidays (loaded from the free Nager.Date holiday service) ----
+  var COUNTRY_CODES = "AD AE AL AM AR AT AU AX BA BB BD BE BG BH BJ BO BR BS BW BY BZ CA CD CH CI CL CM CN CO CR CU CY CZ DE DK DO DZ EC EE EG ES ET FI FO FR GA GB GD GE GG GH GI GL GM GR GT GY HK HN HR HT HU ID IE IL IM IN IQ IR IS IT JE JM JO JP KE KR KW KZ LB LI LK LS LT LU LV MA MC MD ME MG MK MN MS MT MX MY MZ NA NE NG NI NL NO NP NZ OM PA PE PG PH PK PL PR PT PY QA RO RS RU SA SE SG SI SJ SK SM SN SR SV TH TN TR TZ UA UG US UY VA VE VN ZA ZM ZW".split(" ");
+  var HOL_KEY = "annual-leave-holraw";
+  var REGION_NAMES = { "GB-ENG":"England", "GB-SCT":"Scotland", "GB-WLS":"Wales", "GB-NIR":"Northern Ireland",
+    "AU-NSW":"New South Wales", "AU-VIC":"Victoria", "AU-QLD":"Queensland", "AU-WA":"Western Australia", "AU-SA":"South Australia", "AU-TAS":"Tasmania", "AU-ACT":"Australian Capital Territory", "AU-NT":"Northern Territory",
+    "US-AL":"Alabama", "US-AK":"Alaska", "US-AZ":"Arizona", "US-AR":"Arkansas", "US-CA":"California", "US-CO":"Colorado", "US-CT":"Connecticut", "US-DE":"Delaware", "US-DC":"District of Columbia", "US-FL":"Florida", "US-GA":"Georgia", "US-HI":"Hawaii", "US-ID":"Idaho", "US-IL":"Illinois", "US-IN":"Indiana", "US-IA":"Iowa", "US-KS":"Kansas", "US-KY":"Kentucky", "US-LA":"Louisiana", "US-ME":"Maine", "US-MD":"Maryland", "US-MA":"Massachusetts", "US-MI":"Michigan", "US-MN":"Minnesota", "US-MS":"Mississippi", "US-MO":"Missouri", "US-MT":"Montana", "US-NE":"Nebraska", "US-NV":"Nevada", "US-NH":"New Hampshire", "US-NJ":"New Jersey", "US-NM":"New Mexico", "US-NY":"New York", "US-NC":"North Carolina", "US-ND":"North Dakota", "US-OH":"Ohio", "US-OK":"Oklahoma", "US-OR":"Oregon", "US-PA":"Pennsylvania", "US-RI":"Rhode Island", "US-SC":"South Carolina", "US-SD":"South Dakota", "US-TN":"Tennessee", "US-TX":"Texas", "US-UT":"Utah", "US-VT":"Vermont", "US-VA":"Virginia", "US-WA":"Washington", "US-WV":"West Virginia", "US-WI":"Wisconsin", "US-WY":"Wyoming", "DE-BW":"Baden-Württemberg", "DE-BY":"Bavaria", "DE-BE":"Berlin", "DE-BB":"Brandenburg", "DE-HB":"Bremen", "DE-HH":"Hamburg", "DE-HE":"Hesse", "DE-MV":"Mecklenburg-Vorpommern", "DE-NI":"Lower Saxony", "DE-NW":"North Rhine-Westphalia", "DE-RP":"Rhineland-Palatinate", "DE-SL":"Saarland", "DE-SN":"Saxony", "DE-ST":"Saxony-Anhalt", "DE-SH":"Schleswig-Holstein", "DE-TH":"Thuringia",
+    "CA-AB":"Alberta", "CA-BC":"British Columbia", "CA-MB":"Manitoba", "CA-NB":"New Brunswick", "CA-NL":"Newfoundland and Labrador", "CA-NS":"Nova Scotia", "CA-NT":"Northwest Territories", "CA-NU":"Nunavut", "CA-ON":"Ontario", "CA-PE":"Prince Edward Island", "CA-QC":"Quebec", "CA-SK":"Saskatchewan", "CA-YT":"Yukon" };
+  var holBusy = false;
+  function countryName(cc) { try { return new Intl.DisplayNames(["en"], { type:"region" }).of(cc) || cc; } catch (e) { return cc; } }
+  function regionName(code) { return REGION_NAMES[code] || String(code).replace(/^[A-Z]{2}-/, ""); }
+  function isUK() { var c = data.settings.country; return !c || c === "GB"; }
+  function hw(str) { return isUK() ? str : String(str).replace(/Bank holiday/g, "Public holiday").replace(/bank holiday/g, "public holiday"); }
+  function getRaw() { try { var r = JSON.parse(localStorage.getItem(HOL_KEY) || "null"); return r && Array.isArray(r.items) ? r : null; } catch (e) { return null; } }
+  function setRaw(r) { try { localStorage.setItem(HOL_KEY, JSON.stringify(r)); } catch (e) {} }
+  function normHol(arr, v) {
+    return (Array.isArray(arr) ? arr : []).filter(function (h) { return h && /^\d{4}-\d{2}-\d{2}/.test(String(h.date)); }).map(function (h) {
+      var subs = (v === 4 ? h.subdivisionCodes : h.counties) || [];
+      var nat = (v === 4 ? h.nationalHoliday : h.global) === true || !subs.length;
+      return { date:String(h.date).slice(0, 10), name:String(h.name || h.localName || "Holiday"), nat:nat, subs:subs, types:(v === 4 ? h.holidayTypes : h.types) || [] };
+    });
+  }
+  function getJson(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); }); }
+  function fetchYear(cc, y) {
+    return getJson("https://nagerholidays.com/api/v4/Holidays/" + cc + "/" + y).then(function (j) { return normHol(j, 4); })
+      .catch(function () { return getJson("https://date.nager.at/api/v3/PublicHolidays/" + y + "/" + cc).then(function (j) { return normHol(j, 3); }); });
+  }
+  function keepTypes(items) {
+    var pub = items.filter(function (h) { return !h.types.length || h.types.indexOf("Public") > -1; });
+    return pub.length ? pub : items.filter(function (h) { return h.types.indexOf("Bank") > -1; });
+  }
+  function regionsOf(items) { var m = {}; items.forEach(function (h) { h.subs.forEach(function (c) { m[c] = 1; }); }); return Object.keys(m).sort(); }
+  function applyHolidays(items, region) {
+    var seen = {}, built = [];
+    items.filter(function (h) { return h.nat || (region && h.subs.indexOf(region) > -1); })
+      .sort(function (a, b) { return a.date.localeCompare(b.date); })
+      .forEach(function (h) { if (!seen[h.date]) { seen[h.date] = 1; built.push({ date:h.date, name:h.name }); } });
+    var manual = data.holidays.filter(function (h) { return h.manual && !seen[h.date]; });
+    data.holidays = built.concat(manual).sort(function (a, b) { return a.date.localeCompare(b.date); });
+  }
+  function loadCountry(cc, keepRegion) {
+    if (holBusy) return;
+    holBusy = true; render();
+    var y = year(), years = [y - 1, y, y + 1];
+    Promise.all(years.map(function (yy) { return fetchYear(cc, yy).catch(function () { return null; }); })).then(function (lists) {
+      holBusy = false;
+      var ok = lists.filter(function (l) { return l; });
+      if (!ok.length) { toast("Couldn't load holidays. Check your internet connection and try again."); render(); return; }
+      var items = keepTypes([].concat.apply([], ok));
+      if (!items.length) { toast("No holiday data was found for " + countryName(cc) + ". You can add holidays by hand below."); render(); return; }
+      var regs = regionsOf(items);
+      var region = keepRegion && regs.indexOf(data.settings.region) > -1 ? data.settings.region : "";
+      setRaw({ country:cc, years:years, items:items });
+      data.settings.country = cc; data.settings.region = region; data.settings.holUpdated = toStr(new Date());
+      applyHolidays(items, region); save(); render();
+      toast(countryName(cc) + " holidays loaded" + (regs.length && !region ? " · pick your region for local ones" : ""), 3000);
+    });
+  }
+  function changeRegion(region) {
+    var raw = getRaw();
+    if (!raw || raw.country !== data.settings.country) { toast("Tap Update holidays first."); render(); return; }
+    data.settings.region = region; applyHolidays(raw.items, region); save(); render();
+    toast(region ? regionName(region) + " holidays loaded" : "National holidays only");
+  }
+  function countryCard() {
+    var s = data.settings, raw = getRaw();
+    var codes = COUNTRY_CODES.slice();
+    if (codes.indexOf(s.country) < 0) codes.push(s.country);
+    codes.sort(function (a, b) { return countryName(a).localeCompare(countryName(b)); });
+    var regs = raw && raw.country === s.country ? regionsOf(raw.items) : [];
+    var inYear = data.holidays.filter(function (h) { return h.date.slice(0, 4) === String(year()); }).length;
+    var status = s.holUpdated ? "Last updated " + fmt(s.holUpdated, true) + " · " + inYear + " holiday" + (inYear === 1 ? "" : "s") + " in " + year() + "."
+      : (isUK() ? "Using the built-in England and Wales list for 2026–27. Pick your region below to refresh it from the internet." : "");
+    var h = '<div class="card"><h2>Country and holidays</h2><div class="sub" style="margin:-6px 0 12px">Choose where you live and the app loads that country\'s public holidays for ' + (year() - 1) + '–' + (year() + 1) + '. Needs internet.</div>' +
+      '<label for="cty-sel">Country</label><select id="cty-sel"' + (holBusy ? " disabled" : "") + ">" +
+      codes.map(function (c) { return '<option value="' + c + '"' + (c === s.country ? " selected" : "") + ">" + esc(countryName(c)) + "</option>"; }).join("") + "</select>";
+    if (regs.length) {
+      h += '<div style="margin-top:12px"><label for="reg-sel">Region (to include local holidays)</label><select id="reg-sel"><option value="">Whole country (national holidays only)</option>' +
+        regs.map(function (c) { return '<option value="' + esc(c) + '"' + (c === s.region ? " selected" : "") + ">" + esc(regionName(c)) + "</option>"; }).join("") + "</select></div>";
+    }
+    h += '<button class="btn" style="margin-top:12px" data-act="holupdate"' + (holBusy ? " disabled" : "") + ">" + (holBusy ? "Loading holidays…" : "Update holidays for " + esc(countryName(s.country))) + "</button>";
+    h += '<div class="sub" style="margin-top:10px">' + status + "</div>";
+    h += '<div class="sub" style="margin-top:6px">Weekends are counted as Saturday and Sunday.</div></div>';
+    return h;
+  }
+
   function fontCard() {
     var st = getFont(), cur = fontById(st.id);
     var curStyle = cur.fam ? ' style="font-family:' + fontStack(cur) + '"' : "";
@@ -989,10 +1074,11 @@
       '<div class="sub">When this is on, each weekday bank holiday in the year comes off your allowance automatically, so you only log the extra days you book.</div>' +
       '<label class="check" style="margin-top:12px"><input type="checkbox" data-set="showMoon"' + (s.showMoon !== false ? " checked" : "") + '> Show full moon days on the calendar</label>' +
       '<div class="sub">A small \ud83c\udf15 marks the day the moon turns full. Dates are approximate, within about a day.</div></div>' +
-      '<div class="card"><h2>Bank holidays</h2><div class="sub" style="margin-bottom:12px">England &amp; Wales holidays for 2026–27 are pre-loaded. Check them against your region (Scotland and Northern Ireland differ).</div>' +
+      countryCard() +
+      '<div class="card"><h2>Bank holidays</h2><div class="sub" style="margin-bottom:12px">' + (isUK() && !s.holUpdated ? "England &amp; Wales holidays for 2026–27 are pre-loaded. Check them against your region (Scotland and Northern Ireland differ)." : "These come from the country above. Add or remove days if your employer differs.") + "</div>" +
       '<div class="row"><div><label for="h-date">Date</label><input id="h-date" type="date" value="' + hol.date + '"></div>' +
       '<div><label for="h-name">Name</label><input id="h-name" type="text" value="' + esc(hol.name) + '"></div></div>' +
-      '<button class="btn" data-act="addhol">Add holiday</button><button class="btn soft" data-act="addew">Re-add England &amp; Wales 2026–27</button><div style="margin-top:10px">' + hols + "</div></div>" +
+      '<button class="btn" data-act="addhol">Add holiday</button>' + (isUK() ? '<button class="btn soft" data-act="addew">Re-add England &amp; Wales 2026–27</button>' : "") + '<div style="margin-top:10px">' + hols + "</div></div>" +
       '<div class="card" id="bg-card"><h2>Header background</h2><div class="sub" style="margin:-6px 0 12px">Pick a colour style or use a picture from your gallery. It is saved on this phone only.</div>' +
       '<div class="hpreview" style="background:' + (headerCss() || (GLOW + PRESETS[0].css)) + '"></div>' +
       '<div class="swatches">' + PRESETS.map(function (p) {
@@ -1026,14 +1112,15 @@
         '<div class="herolbl"><b>days left</b><span>this year</span></div>' +
         '<div class="ifall">if pending<br>approved<b>' + num(c.remainingIfAll) + "</b></div></div>";
     }
-    document.getElementById("app").innerHTML =
+    var appHtml =
       '<div class="top' + (big ? " big" : "") + (hasPhoto() ? " photo" : "") + '"><button class="editbg" data-act="bgedit" aria-label="Change header background"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.7"/><path d="M4 17l5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button><h1>' + (s.name ? esc(s.name) + "'s leave" : "Annual leave") + " " + year() + "</h1>" + stage +
       "<p id=\"topnote\"></p></div>" +
       '<div class="body' + (enterAnim ? " enter" : "") + '">' + (tab === "overview" ? overview(c) : tab === "calendar" ? calView(c) : tab === "log" ? logView(c) : settingsView()) + "</div>" +
       '<div class="nav"><div class="navIn" role="tablist">' + nav + "</div></div>";
+    document.getElementById("app").innerHTML = hw(appHtml);
     enterAnim = false;
     var tn = document.getElementById("topnote");
-    if (tn) tn.textContent = (tab === "overview" && topNote) ? topNote : (s.includesBH ? "Your allowance includes bank holidays." : "Weekends and bank holidays aren't counted.");
+    if (tn) tn.textContent = hw((tab === "overview" && topNote) ? topNote : (s.includesBH ? "Your allowance includes bank holidays." : "Weekends and bank holidays aren't counted."));
     if (tab === "overview" && animate) runCountUps();
     if (tab === "overview") animate = false;
     if (tab === "log") updatePreview();
@@ -1093,7 +1180,7 @@
   function toast(msg, ms) {
     Array.prototype.forEach.call(document.querySelectorAll(".toast"), function (o) { if (o.parentNode) o.parentNode.removeChild(o); });
     var t = document.createElement("div");
-    t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg;
+    t.className = "toast"; t.setAttribute("role", "status"); t.textContent = hw(msg);
     document.body.appendChild(t);
     setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 1800);
   }
@@ -1134,6 +1221,7 @@
       var st = getFont(); st.id = t.dataset.id; saveFont(st); applyFont(); render(); toast(fontById(st.id).name); return;
     }
     if (act === "fontscope") { var st2 = getFont(); st2.scope = t.dataset.scope; saveFont(st2); applyFont(); render(); return; }
+    if (act === "holupdate") { loadCountry(data.settings.country, true); return; }
     if (act === "copycode") { copyCode(); return; }
     if (act === "savefile") { saveFile(); return; }
     if (act === "restorecode") { var ci = document.getElementById("code-in"); restoreFrom(ci ? ci.value : ""); return; }
@@ -1153,7 +1241,7 @@
     } else if (act === "addhol") {
       var d = document.getElementById("h-date").value, n = document.getElementById("h-name").value;
       if (!d || data.holidays.some(function (h) { return h.date === d; })) return;
-      data.holidays.push({ date:d, name:n || "Bank holiday" });
+      data.holidays.push({ date:d, name:n || "Bank holiday", manual:true });
       data.holidays.sort(function (a, b) { return a.date.localeCompare(b.date); });
       hol = { date:"", name:"" }; save(); render();
     } else if (act === "addew") {
@@ -1204,6 +1292,13 @@
       var bf = el.files && el.files[0];
       if (bf) usePhotoFile(bf);
       el.value = "";
+    } else if (el.id === "cty-sel") {
+      var cc = el.value;
+      if (cc !== data.settings.country) {
+        if (window.confirm("Replace your holiday list with the public holidays for " + countryName(cc) + "? Holidays you add by hand afterwards are kept.")) loadCountry(cc, false); else render();
+      }
+    } else if (el.id === "reg-sel") {
+      changeRegion(el.value);
     } else if (el.id === "fit-sel") {
       try { localStorage.setItem(FIT_KEY, el.value); } catch (e) {}
       applyFit(); render();
